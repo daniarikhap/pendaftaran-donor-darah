@@ -28,8 +28,21 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'nomorindukpegawai' => ['required', 'string'],
             'password' => ['required', 'string'],
+        ];
+    }
+
+    /**
+     * Get the custom validation messages for the request.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'nomorindukpegawai.required' => 'Nomor Induk Pegawai (NIP) wajib diisi.',
+            'password.required' => 'Password wajib diisi.',
         ];
     }
 
@@ -42,11 +55,42 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $nip = trim((string) $this->input('nomorindukpegawai'));
+        $password = (string) $this->input('password');
+
+        $pegawai = \App\Models\Pegawai::where('nomorindukpegawai', $nip)->first();
+
+        if (! $pegawai) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'nomorindukpegawai' => 'Nomor Induk Pegawai (NIP) tidak terdaftar.',
+            ]);
+        }
+
+        $user = \App\Models\User::where('pegawai_id', $pegawai->pegawai_id)->first();
+
+        if (! $user) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'nomorindukpegawai' => 'Nomor Induk Pegawai (NIP) tidak terdaftar.',
+            ]);
+        }
+
+        if (! $user->statusaktif) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'nomorindukpegawai' => 'Akun pegawai ini sedang tidak aktif.',
+            ]);
+        }
+
+        if (! Auth::attempt(['pegawai_id' => $user->pegawai_id, 'password' => $password], $this->boolean('remember'))) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'password' => 'Password yang Anda masukkan salah.',
             ]);
         }
 
@@ -69,7 +113,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'nomorindukpegawai' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -81,6 +125,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower((string) $this->input('nomorindukpegawai')).'|'.$this->ip());
     }
 }

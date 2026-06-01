@@ -13,24 +13,87 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <body class="font-sans antialiased text-slate-800 bg-slate-50">
+        <div class="min-h-screen flex bg-slate-50">
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col min-w-0">
+                <!-- Page Heading -->
+                @isset($header)
+                    <header class="bg-white shadow-sm border-b border-slate-200/80">
+                        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endisset
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                <!-- Page Content -->
+                <main class="flex-1 p-6">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
+
+        <!-- SweetAlert2 Session Notifications -->
+        @if (session('status') || session('success') || session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'colored-toast rounded-xl shadow-lg border border-slate-100',
+                            title: 'font-semibold text-slate-800 text-sm'
+                        },
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+
+                    @if (session('status'))
+                        let status = "{{ session('status') }}";
+                        let message = status;
+                        let icon = 'success';
+                        
+                        if (status === 'profile-updated') {
+                            message = "Data pegawai berhasil disimpan!";
+                        } else if (status === 'password-updated') {
+                            message = "Password berhasil diperbarui!";
+                        } else {
+                            // If it's a verification or something else, show it
+                            icon = 'info';
+                        }
+                        
+                        Toast.fire({
+                            icon: icon,
+                            title: message
+                        });
+                    @endif
+
+                    @if (session('success'))
+                        Toast.fire({
+                            icon: 'success',
+                            title: "{{ session('success') }}"
+                        });
+                    @endif
+
+                    @if (session('error'))
+                        Toast.fire({
+                            icon: 'error',
+                            title: "{{ session('error') }}"
+                        });
+                    @endif
+                });
+            </script>
+        @endif
     </body>
 </html>

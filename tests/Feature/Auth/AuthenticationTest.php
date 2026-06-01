@@ -22,7 +22,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->post('/login', [
-            'email' => $user->email,
+            'nomorindukpegawai' => $user->pegawai->nomorindukpegawai,
             'password' => 'password',
         ]);
 
@@ -34,12 +34,40 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
-            'email' => $user->email,
+        $response = $this->post('/login', [
+            'nomorindukpegawai' => $user->pegawai->nomorindukpegawai,
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
+        $response->assertSessionHasErrors([
+            'password' => 'Password yang Anda masukkan salah.',
+        ]);
+    }
+
+    public function test_users_cannot_authenticate_if_fields_are_missing(): void
+    {
+        $response = $this->post('/login', [
+            'nomorindukpegawai' => '',
+            'password' => '',
+        ]);
+
+        $response->assertSessionHasErrors([
+            'nomorindukpegawai' => 'Nomor Induk Pegawai (NIP) wajib diisi.',
+            'password' => 'Password wajib diisi.',
+        ]);
+    }
+
+    public function test_users_cannot_authenticate_if_nip_is_not_registered(): void
+    {
+        $response = $this->post('/login', [
+            'nomorindukpegawai' => '999999999',
+            'password' => 'any-password',
+        ]);
+
+        $response->assertSessionHasErrors([
+            'nomorindukpegawai' => 'Nomor Induk Pegawai (NIP) tidak terdaftar.',
+        ]);
     }
 
     public function test_users_can_logout(): void
@@ -49,6 +77,6 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post('/logout');
 
         $this->assertGuest();
-        $response->assertRedirect('/');
+        $response->assertRedirect('/login');
     }
 }

@@ -17,9 +17,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        $pegawai = \App\Models\Pegawai::factory()->create([
+            'pegawai_nama' => 'Admin',
+            'nomoridentitas' => '12345678',
+            'nomorindukpegawai' => '12345678',
+        ]);
+
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'pegawai_id' => $pegawai->pegawai_id,
+            'username' => 'admin',
+            'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+            'statusaktif' => true,
         ]);
     }
 }

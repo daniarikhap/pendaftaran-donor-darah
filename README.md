@@ -78,11 +78,19 @@ Jalankan migrasi untuk membuat tabel database beserta data awal (seeders):
 ```
 
 ### 7. Install & Jalankan Frontend Assets
-Instal modul Node.js dan jalankan server Vite untuk kompilasi asset frontend secara real-time:
-```bash
-./vendor/bin/sail npm install
-./vendor/bin/sail npm run dev
-```
+Instal modul Node.js dan lakukan kompilasi asset frontend.
+
+* **Mode Produksi (Rekomendasi agar tidak perlu menjalankan server dev secara terus-menerus):**
+  ```bash
+  ./vendor/bin/sail npm install
+  ./vendor/bin/sail npm run build
+  ```
+
+* **Mode Pengembangan (Jika ingin kompilasi real-time / hot reload):**
+  ```bash
+  ./vendor/bin/sail npm install
+  ./vendor/bin/sail npm run dev
+  ```
 
 ---
 

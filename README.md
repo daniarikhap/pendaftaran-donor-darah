@@ -128,3 +128,15 @@ Setelah membuat alias, Anda dapat menggunakan perintah di bawah ini:
 2. **Docker Desktop belum berjalan**
    Pastikan aplikasi Docker Desktop di Windows sudah dibuka dan dalam status *Running* (berwarna hijau) sebelum menjalankan `./vendor/bin/sail up -d`.
 
+3. **Error: `dial tcp: lookup ... no such host` (Masalah DNS di WSL2/Docker)**
+   Jika Anda mendapatkan error saat mengunduh image (*pull access denied* atau *no such host*) yang menandakan WSL2 tidak terhubung ke internet:
+   Jalankan perintah berikut di terminal WSL Anda untuk mengonfigurasi DNS Google secara manual:
+   ```bash
+   # Hapus file konfigurasi DNS lama yang bermasalah
+   sudo rm -f /etc/resolv.conf
+
+   # Buat file baru dengan DNS Google
+   echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+   ```
+
+

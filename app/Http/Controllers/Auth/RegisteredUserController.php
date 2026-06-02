@@ -38,6 +38,15 @@ class RegisteredUserController extends Controller
             'nomorindukpegawai' => ['required', 'string', 'max:255', 'unique:master_pegawai,nomorindukpegawai'],
             'username' => ['required', 'string', 'max:255', 'unique:login_user,username'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'pegawai_nama.required' => 'Nama Lengkap Pegawai wajib diisi.',
+            'nomoridentitas.required' => 'Nomor Identitas (NIK) wajib diisi.',
+            'nomorindukpegawai.required' => 'Nomor Induk Pegawai (NIP) wajib diisi.',
+            'nomorindukpegawai.unique' => 'Nomor Induk Pegawai (NIP) sudah terdaftar.',
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username sudah terdaftar.',
+            'password.required' => 'Kata Sandi wajib diisi.',
+            'password.confirmed' => 'Konfirmasi Kata Sandi tidak cocok.',
         ]);
 
         $user = DB::transaction(function () use ($request) {

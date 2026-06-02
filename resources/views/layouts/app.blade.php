@@ -22,18 +22,22 @@
             @include('layouts.navigation')
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col min-w-0">
+            <div class="flex-1 flex flex-col min-w-0 relative bg-gradient-to-br from-slate-50 via-rose-50/10 to-slate-50">
+                <!-- Subtle elegant pink/rose glowing background blobs -->
+                <div class="absolute right-0 top-0 w-96 h-96 rounded-full bg-rose-500/[0.03] blur-[100px] pointer-events-none"></div>
+                <div class="absolute left-1/3 bottom-0 w-96 h-96 rounded-full bg-pink-500/[0.03] blur-[120px] pointer-events-none"></div>
+
                 <!-- Page Heading -->
                 @isset($header)
-                    <header class="bg-white shadow-sm border-b border-slate-200/80">
-                        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <header class="bg-white shadow-sm border-b border-slate-200/80 min-h-[73px] flex items-center z-10">
+                        <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-3">
                             {{ $header }}
                         </div>
                     </header>
                 @endisset
 
                 <!-- Page Content -->
-                <main class="flex-1 p-6">
+                <main class="flex-1 p-6 z-10">
                     {{ $slot }}
                 </main>
             </div>

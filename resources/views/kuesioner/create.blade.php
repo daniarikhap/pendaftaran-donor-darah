@@ -34,7 +34,7 @@
                         <div>
                             <label for="kuesioner_urutan" class="block text-sm font-semibold text-slate-700 mb-1">Urutan</label>
                             <input type="number" name="kuesioner_urutan" id="kuesioner_urutan" min="1" 
-                                   value="{{ old('kuesioner_urutan') }}" placeholder="1"
+                                   value="{{ old('kuesioner_urutan') }}" placeholder="Masukkan Urutan"
                                    class="w-full rounded-xl border-slate-200 focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50 text-sm transition duration-150 @error('kuesioner_urutan') border-red-300 focus:border-red-500 focus:ring-red-200 @enderror">
                             @error('kuesioner_urutan')
                                 <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>

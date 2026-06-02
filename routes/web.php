@@ -2,13 +2,26 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Pegawai;
+use App\Models\Ruangan;
+use App\Models\Pendonor;
+use App\Models\KuesionerDonor;
+
+use App\Models\Pekerjaan;
 
 Route::get('/', function () {
-    return view('welcome');
+    $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
+    $pendonors = Pendonor::all();
+    return view('welcome', compact('pekerjaans', 'pendonors'));
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $jumlahPegawai = Pegawai::count();
+    $jumlahRuangan = Ruangan::count();
+    $jumlahPendonor = Pendonor::count();
+    $jumlahKuesioner = KuesionerDonor::count();
+
+    return view('dashboard', compact('jumlahPegawai', 'jumlahRuangan', 'jumlahPendonor', 'jumlahKuesioner'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -18,6 +31,12 @@ Route::middleware('auth')->group(function () {
 
     // Kuesioner CRUD
     Route::resource('kuesioner', \App\Http\Controllers\KuesionerController::class)->except(['show']);
+
+    // Ruangan CRUD
+    Route::resource('ruangan', \App\Http\Controllers\RuanganController::class)->except(['show']);
+
+    // Pekerjaan CRUD
+    Route::resource('pekerjaan', \App\Http\Controllers\PekerjaanController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';

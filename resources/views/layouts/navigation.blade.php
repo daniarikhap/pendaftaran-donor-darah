@@ -1,4 +1,4 @@
-<aside x-data="{ sidebarOpen: true, masterOpen: false, informasiOpen: false }" 
+<aside x-data="{ sidebarOpen: true, masterOpen: {{ request()->routeIs('kuesioner.*') ? 'true' : 'false' }}, informasiOpen: false }" 
        class="flex flex-col h-screen sticky top-0 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out shrink-0"
        :class="sidebarOpen ? 'w-64' : 'w-20'">
     
@@ -69,8 +69,8 @@
             
             <!-- Submenu Master -->
             <div x-show="masterOpen && sidebarOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" class="mt-1 pl-8 space-y-1">
-                <a href="#" 
-                   class="block px-3 py-2 text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50/50 rounded-md transition-colors duration-150">
+                <a href="{{ route('kuesioner.index') }}" 
+                   class="block px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 {{ request()->routeIs('kuesioner.*') ? 'text-rose-600 bg-rose-50/50 font-semibold' : 'text-slate-600 hover:text-rose-600 hover:bg-rose-50/50' }}">
                     Kuesioner
                 </a>
             </div>

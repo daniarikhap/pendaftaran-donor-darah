@@ -143,7 +143,7 @@ Setelah membuat alias, Anda dapat menggunakan perintah di bawah ini:
    # Hapus file konfigurasi DNS lama yang bermasalah
    sudo rm -f /etc/resolv.conf
 
-   # Buat file baru dengan DNS Google
+   # Buat file baru dengan DNS Google.
    echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
    ```
 

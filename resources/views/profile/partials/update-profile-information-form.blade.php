@@ -14,15 +14,15 @@
         @method('patch')
 
         <div>
-            <x-input-label for="pegawai_nama" :value="__('Nama Pegawai')" />
-            <x-text-input id="pegawai_nama" name="pegawai_nama" type="text" class="mt-1 block w-full" :value="old('pegawai_nama', $user->pegawai->pegawai_nama ?? '')" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('pegawai_nama')" />
+            <x-input-label for="nama_pegawai" :value="__('Nama Pegawai')" />
+            <x-text-input id="nama_pegawai" name="nama_pegawai" type="text" class="mt-1 block w-full" :value="old('nama_pegawai', $user->pegawai->nama_pegawai ?? '')" required autofocus autocomplete="name" />
+            <x-input-error class="mt-2" :messages="$errors->get('nama_pegawai')" />
         </div>
 
         <div>
-            <x-input-label for="nomoridentitas" :value="__('Nomor Identitas')" />
-            <x-text-input id="nomoridentitas" name="nomoridentitas" type="text" class="mt-1 block w-full" :value="old('nomoridentitas', $user->pegawai->nomoridentitas ?? '')" required />
-            <x-input-error class="mt-2" :messages="$errors->get('nomoridentitas')" />
+            <x-input-label for="noidentitas" :value="__('Nomor Identitas')" />
+            <x-text-input id="noidentitas" name="noidentitas" type="text" class="mt-1 block w-full" :value="old('noidentitas', $user->pegawai->noidentitas ?? '')" required />
+            <x-input-error class="mt-2" :messages="$errors->get('noidentitas')" />
         </div>
 
         <div>

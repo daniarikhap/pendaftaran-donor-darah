@@ -12,8 +12,15 @@ use App\Models\Pekerjaan;
 Route::get('/', function () {
     $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
     $pendonors = Pendonor::all();
-    return view('welcome', compact('pekerjaans', 'pendonors'));
+    $provinsis = \App\Models\Provinsi::all();
+    return view('pendaftaran-donordarah.Pendonor.welcome', compact('pekerjaans', 'pendonors', 'provinsis'));
 });
+
+Route::post('/pendonor', [\App\Http\Controllers\PendonorController::class, 'store'])->name('pendonor.store');
+Route::put('/pendonor/{id}', [\App\Http\Controllers\PendonorController::class, 'update'])->name('pendonor.update');
+Route::get('/api/kabupaten/{provinsi_id}', [\App\Http\Controllers\PendonorController::class, 'getKabupaten']);
+Route::get('/api/kecamatan/{kabupaten_id}', [\App\Http\Controllers\PendonorController::class, 'getKecamatan']);
+Route::get('/api/kelurahan/{kecamatan_id}', [\App\Http\Controllers\PendonorController::class, 'getKelurahan']);
 
 Route::get('/dashboard', function () {
     $jumlahPegawai = Pegawai::count();
@@ -21,7 +28,7 @@ Route::get('/dashboard', function () {
     $jumlahPendonor = Pendonor::count();
     $jumlahKuesioner = KuesionerDonor::count();
 
-    return view('dashboard', compact('jumlahPegawai', 'jumlahRuangan', 'jumlahPendonor', 'jumlahKuesioner'));
+    return view('pendaftaran-donordarah.Admin.dashboard', compact('jumlahPegawai', 'jumlahRuangan', 'jumlahPendonor', 'jumlahKuesioner'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

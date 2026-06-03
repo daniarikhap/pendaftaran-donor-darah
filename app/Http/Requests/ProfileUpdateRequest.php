@@ -17,8 +17,8 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pegawai_nama' => ['required', 'string', 'max:255'],
-            'nomoridentitas' => ['required', 'string', 'max:255'],
+            'nama_pegawai' => ['required', 'string', 'max:255'],
+            'noidentitas' => ['required', 'string', 'max:255'],
             'nomorindukpegawai' => [
                 'required',
                 'string',

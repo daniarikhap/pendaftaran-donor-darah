@@ -14,7 +14,7 @@
 
         <!-- Nama Lengkap -->
         <div class="space-y-1.5">
-            <label for="pegawai_nama" class="block font-semibold text-sm text-slate-700">{{ __('Nama Lengkap Pegawai') }} <span class="text-rose-500">*</span></label>
+            <label for="nama_pegawai" class="block font-semibold text-sm text-slate-700">{{ __('Nama Lengkap Pegawai') }} <span class="text-rose-500">*</span></label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <!-- User icon -->
@@ -22,14 +22,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
-                <input id="pegawai_nama" type="text" name="pegawai_nama" value="{{ old('pegawai_nama') }}" required autofocus autocomplete="name" class="block w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 shadow-sm" placeholder="Nama lengkap pegawai" />
+                <input id="nama_pegawai" type="text" name="nama_pegawai" value="{{ old('nama_pegawai') }}" required autofocus autocomplete="name" class="block w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 shadow-sm" placeholder="Nama lengkap pegawai" />
             </div>
-            <x-input-error :messages="$errors->get('pegawai_nama')" class="mt-1" />
+            <x-input-error :messages="$errors->get('nama_pegawai')" class="mt-1" />
         </div>
 
         <!-- Nomor Identitas -->
         <div class="space-y-1.5">
-            <label for="nomoridentitas" class="block font-semibold text-sm text-slate-700">{{ __('Nomor Identitas (NIK)') }} <span class="text-rose-500">*</span></label>
+            <label for="noidentitas" class="block font-semibold text-sm text-slate-700">{{ __('Nomor Identitas (NIK)') }} <span class="text-rose-500">*</span></label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <!-- Identification card icon -->
@@ -37,9 +37,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8h2m-2 2h2m4-4h2" />
                     </svg>
                 </div>
-                <input id="nomoridentitas" type="text" name="nomoridentitas" value="{{ old('nomoridentitas') }}" required class="block w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 shadow-sm" placeholder="Nomor NIK KTP Anda" />
+                <input id="noidentitas" type="text" name="noidentitas" value="{{ old('noidentitas') }}" required class="block w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 shadow-sm" placeholder="Nomor NIK KTP Anda" />
             </div>
-            <x-input-error :messages="$errors->get('nomoridentitas')" class="mt-1" />
+            <x-input-error :messages="$errors->get('noidentitas')" class="mt-1" />
         </div>
 
         <!-- Nomor Induk Pegawai (NIP) -->

@@ -19,7 +19,7 @@
     </head>
     <body class="font-sans antialiased text-slate-800 bg-slate-50">
         <div class="min-h-screen flex bg-slate-50">
-            @include('layouts.navigation')
+            @include('pendaftaran-donordarah.Admin.navigation')
 
             <!-- Main Content Area -->
             <div class="flex-1 flex flex-col min-w-0 relative bg-gradient-to-br from-slate-50 via-rose-50/10 to-slate-50">

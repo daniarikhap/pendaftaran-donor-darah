@@ -15,9 +15,10 @@ class PegawaiFactory extends Factory
     public function definition(): array
     {
         return [
-            'pegawai_nama' => fake()->name(),
-            'nomoridentitas' => fake()->unique()->numerify('################'),
+            'nama_pegawai' => fake()->name(),
+            'noidentitas' => fake()->unique()->numerify('################'),
             'nomorindukpegawai' => fake()->unique()->numerify('19#########'),
+            'is_admin' => false,
         ];
     }
 }

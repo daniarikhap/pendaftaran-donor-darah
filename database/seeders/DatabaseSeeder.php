@@ -18,9 +18,10 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $pegawai = \App\Models\Pegawai::factory()->create([
-            'pegawai_nama' => 'Admin',
-            'nomoridentitas' => '12345678',
+            'nama_pegawai' => 'Admin',
+            'noidentitas' => '12345678',
             'nomorindukpegawai' => '12345678',
+            'is_admin' => true,
         ]);
 
         User::factory()->create([
@@ -49,20 +50,6 @@ class DatabaseSeeder extends Seeder
             'ruangan_nama' => 'Unit Transfusi Darah Utama',
             'ruangan_singkatan' => 'UTD Main',
             'pekerjaan_aktif' => true,
-        ]);
-
-        // Seed a sample Pendonor for "Pendonor Lama" testing
-        \App\Models\Pendonor::create([
-            'pegawai_id' => $pegawai->pegawai_id,
-            'pekerjaan_id' => 1, // Pegawai Swasta
-            'no_pendonor' => 'PD-0001',
-            'jenisidentitas' => 'NIK',
-            'no_identitas' => '3201234567890001',
-            'nama_lengkap' => 'Budi Santoso',
-            'tempat_lahir' => 'Jakarta',
-            'tgllahir' => '1990-05-15',
-            'jenis_kelamin' => 'Laki-laki',
-            'alamat_lengkap' => 'Jl. Mawar No. 12, Jakarta',
         ]);
     }
 }

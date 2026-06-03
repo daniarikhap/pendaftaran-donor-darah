@@ -11,11 +11,66 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('provinsi', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama');
+            $table->timestamps();
+        });
+
+        Schema::create('kabupaten', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('provinsi_id');
+            $table->string('nama');
+            $table->timestamps();
+
+            $table->foreign('provinsi_id')->references('id')->on('provinsi')->onDelete('cascade');
+        });
+
+        Schema::create('kecamatan', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('kabupaten_id');
+            $table->string('nama');
+            $table->timestamps();
+
+            $table->foreign('kabupaten_id')->references('id')->on('kabupaten')->onDelete('cascade');
+        });
+
+        Schema::create('kelurahan', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('kecamatan_id');
+            $table->string('nama');
+            $table->timestamps();
+
+            $table->foreign('kecamatan_id')->references('id')->on('kecamatan')->onDelete('cascade');
+        });
+
         Schema::create('master_pegawai', function (Blueprint $table) {
             $table->increments('pegawai_id');
-            $table->string('pegawai_nama');
-            $table->string('nomoridentitas');
+            $table->unsignedInteger('loginuser_id')->nullable();
+            $table->string('nama_pegawai');
+            $table->string('jenisidentitas')->nullable();
+            $table->string('noidentitas');
             $table->string('nomorindukpegawai')->unique();
+            $table->integer('provinsi_id')->nullable();
+            $table->integer('kabupaten_id')->nullable();
+            $table->integer('kecamatan_id')->nullable();
+            $table->integer('kelurahan_id')->nullable();
+            $table->string('tempatlahir_pegawai')->nullable();
+            $table->date('tgl_lahirpegawai')->nullable();
+            $table->string('jeniskelamin')->nullable();
+            $table->string('statusperkawinan')->nullable();
+            $table->text('alamat_pegawai')->nullable();
+            $table->string('agama')->nullable();
+            $table->string('golongandarah')->nullable();
+            $table->string('rhesus')->nullable();
+            $table->string('alamatemail')->nullable();
+            $table->string('notelp_pegawai')->nullable();
+            $table->string('nomobile_pegawai')->nullable();
+            $table->string('warganegara_pegawai')->nullable();
+            $table->double('tinggibadan')->nullable();
+            $table->double('beratbadan')->nullable();
+            $table->boolean('pegawai_aktif')->default(true);
+            $table->boolean('is_admin')->default(false);
             $table->timestamps();
         });
 
@@ -48,16 +103,38 @@ return new class extends Migration
 
         Schema::create('pendonor', function (Blueprint $table) {
             $table->increments('pendonor_id');
-            $table->unsignedInteger('pegawai_id');
-            $table->unsignedInteger('pekerjaan_id');
-            $table->string('no_pendonor');
-            $table->string('jenisidentitas', 50);
-            $table->string('no_identitas');
+            $table->string('no_pendonor')->nullable();
+            $table->string('jenisidentitas')->nullable();
+            $table->string('no_identitas')->nullable();
             $table->string('nama_lengkap');
-            $table->string('tempat_lahir');
-            $table->date('tgllahir');
-            $table->string('jenis_kelamin');
-            $table->string('alamat_lengkap');
+            $table->string('tempat_lahir')->nullable();
+            $table->date('tgllahir')->nullable();
+            $table->string('jenis_kelamin')->nullable();
+            $table->string('alamat_lengkap')->nullable();
+            $table->double('beratbadan_kg')->nullable();
+            $table->double('tinggibadan_cm')->nullable();
+            $table->string('notelp_pendonor')->nullable();
+            $table->string('nomobile_pendonor')->nullable();
+            $table->unsignedInteger('pekerjaan_id')->nullable();
+            $table->string('statusperkawinan')->nullable();
+            $table->string('gol_darah')->nullable();
+            $table->string('rhesus')->nullable();
+            $table->boolean('is_pernah_donor')->nullable();
+            $table->integer('donasi_ke_sblm')->nullable();
+            $table->date('tgl_donor_terakhir')->nullable();
+            $table->string('tempat_donor_terakhir')->nullable();
+            $table->integer('donasi_ke')->nullable();
+            $table->timestamp('create_time')->nullable();
+            $table->timestamp('update_time')->nullable();
+            $table->integer('create_loginpemakai_id')->nullable();
+            $table->integer('update_loginpemakai_id')->nullable();
+            $table->integer('create_ruangan')->nullable();
+            $table->unsignedInteger('pegawai_id')->nullable();
+            $table->integer('propinsi_id')->nullable();
+            $table->integer('kabupaten_id')->nullable();
+            $table->integer('kecamatan_id')->nullable();
+            $table->integer('kelurahan_id')->nullable();
+            $table->string('agama')->nullable();
             $table->timestamps();
 
             $table->foreign('pegawai_id')->references('pegawai_id')->on('master_pegawai')->onDelete('cascade');
@@ -162,5 +239,9 @@ return new class extends Migration
         Schema::dropIfExists('master_ruangan');
         Schema::dropIfExists('master_pekerjaan');
         Schema::dropIfExists('master_pegawai');
+        Schema::dropIfExists('kelurahan');
+        Schema::dropIfExists('kecamatan');
+        Schema::dropIfExists('kabupaten');
+        Schema::dropIfExists('provinsi');
     }
 };

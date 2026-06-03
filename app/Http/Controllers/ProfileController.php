@@ -33,8 +33,8 @@ class ProfileController extends Controller
 
         if ($user->pegawai) {
             $user->pegawai->update([
-                'pegawai_nama' => $request->validated()['pegawai_nama'],
-                'nomoridentitas' => $request->validated()['nomoridentitas'],
+                'nama_pegawai' => $request->validated()['nama_pegawai'],
+                'noidentitas' => $request->validated()['noidentitas'],
                 'nomorindukpegawai' => $request->validated()['nomorindukpegawai'],
             ]);
         }

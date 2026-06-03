@@ -33,14 +33,14 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'pegawai_nama' => ['required', 'string', 'max:255'],
-            'nomoridentitas' => ['required', 'string', 'max:255'],
+            'nama_pegawai' => ['required', 'string', 'max:255'],
+            'noidentitas' => ['required', 'string', 'max:255'],
             'nomorindukpegawai' => ['required', 'string', 'max:255', 'unique:master_pegawai,nomorindukpegawai'],
             'username' => ['required', 'string', 'max:255', 'unique:login_user,username'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
-            'pegawai_nama.required' => 'Nama Lengkap Pegawai wajib diisi.',
-            'nomoridentitas.required' => 'Nomor Identitas (NIK) wajib diisi.',
+            'nama_pegawai.required' => 'Nama Lengkap Pegawai wajib diisi.',
+            'noidentitas.required' => 'Nomor Identitas (NIK) wajib diisi.',
             'nomorindukpegawai.required' => 'Nomor Induk Pegawai (NIP) wajib diisi.',
             'nomorindukpegawai.unique' => 'Nomor Induk Pegawai (NIP) sudah terdaftar.',
             'username.required' => 'Username wajib diisi.',
@@ -51,9 +51,10 @@ class RegisteredUserController extends Controller
 
         $user = DB::transaction(function () use ($request) {
             $pegawai = Pegawai::create([
-                'pegawai_nama' => $request->pegawai_nama,
-                'nomoridentitas' => $request->nomoridentitas,
+                'nama_pegawai' => $request->nama_pegawai,
+                'noidentitas' => $request->noidentitas,
                 'nomorindukpegawai' => $request->nomorindukpegawai,
+                'is_admin' => false,
             ]);
 
             return User::create([

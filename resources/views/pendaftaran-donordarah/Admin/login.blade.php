@@ -39,11 +39,6 @@
         <div class="space-y-1.5">
             <div class="flex items-center justify-between">
                 <label for="password" class="block font-semibold text-sm text-slate-700">{{ __('Password') }}</label>
-                {{-- @if (Route::has('password.request'))
-                    <a class="text-xs font-semibold text-rose-600 hover:text-rose-500 hover:underline focus:outline-none focus:ring-2 focus:ring-rose-500/20 rounded" href="{{ route('password.request') }}">
-                        {{ __('Lupa kata sandi?') }}
-                    </a>
-                @endif --}}
             </div>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -60,16 +55,6 @@
             <x-input-error :messages="$errors->get('password')" class="mt-1" />
         </div>
 
-        <!-- Remember Me & Options -->
-        {{-- <div class="flex items-center justify-between">
-            <label for="remember_me" class="inline-flex items-center cursor-pointer">
-                <input id="remember_me" type="checkbox"
-                    class="rounded border-slate-300 text-rose-600 focus:ring-rose-500/30 focus:ring-offset-0 transition duration-150 cursor-pointer"
-                    name="remember">
-                <span class="ms-2.5 text-sm text-slate-600 select-none">{{ __('Ingat saya') }}</span>
-            </label>
-        </div> --}}
-
         <!-- Submit Button -->
         <div>
             <button type="submit"
@@ -81,16 +66,13 @@
                 </svg>
             </button>
         </div>
-
-        <!-- Registration Link -->
-        {{-- <div class="text-center pt-2">
+        <div class="text-center lg:text-left pt-6 border-t border-slate-100 mt-8">
             <p class="text-sm text-slate-500">
-                Belum terdaftar sebagai pendonor?
-                <a href="{{ route('register') }}"
-                    class="font-bold text-rose-600 hover:text-rose-500 hover:underline transition duration-150">
-                    Daftar Sekarang
+                <a href="{{ url('/') }}"
+                    class="font-bold text-rose-600 hover:text-rose-500 transition duration-150">
+                    Masuk Ke Akun Pendonor &rarr;
                 </a>
             </p>
-        </div> --}}
+        </div>
     </form>
 </x-guest-layout>

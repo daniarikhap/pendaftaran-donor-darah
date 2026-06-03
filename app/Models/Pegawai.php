@@ -14,9 +14,31 @@ class Pegawai extends Model
     protected $primaryKey = 'pegawai_id';
 
     protected $fillable = [
-        'pegawai_nama',
-        'nomoridentitas',
+        'loginuser_id',
+        'nama_pegawai',
+        'jenisidentitas',
+        'noidentitas',
         'nomorindukpegawai',
+        'provinsi_id',
+        'kabupaten_id',
+        'kecamatan_id',
+        'kelurahan_id',
+        'tempatlahir_pegawai',
+        'tgl_lahirpegawai',
+        'jeniskelamin',
+        'statusperkawinan',
+        'alamat_pegawai',
+        'agama',
+        'golongandarah',
+        'rhesus',
+        'alamatemail',
+        'notelp_pegawai',
+        'nomobile_pegawai',
+        'warganegara_pegawai',
+        'tinggibadan',
+        'beratbadan',
+        'pegawai_aktif',
+        'is_admin',
     ];
 
     public function loginUsers(): HasMany

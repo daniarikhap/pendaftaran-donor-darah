@@ -21,6 +21,7 @@ Route::put('/pendonor/{id}', [\App\Http\Controllers\PendonorController::class, '
 Route::get('/api/kabupaten/{provinsi_id}', [\App\Http\Controllers\PendonorController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{kabupaten_id}', [\App\Http\Controllers\PendonorController::class, 'getKecamatan']);
 Route::get('/api/kelurahan/{kecamatan_id}', [\App\Http\Controllers\PendonorController::class, 'getKelurahan']);
+Route::post('/api/verify-pegawai', [\App\Http\Controllers\PendonorController::class, 'verifyPegawai']);
 
 Route::get('/dashboard', function () {
     $jumlahPegawai = Pegawai::count();

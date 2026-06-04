@@ -18,7 +18,7 @@ class PendonorController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'jenisidentitas' => 'required|string',
             'no_identitas' => 'required|string',
             'nama_lengkap' => 'required|string|max:255',
@@ -38,7 +38,25 @@ class PendonorController extends Controller
             'kecamatan_id' => 'required|exists:kecamatan,id',
             'kelurahan_id' => 'required|exists:kelurahan,id',
             'no_mobile' => 'required|string',
-        ]);
+            'pegawai_id' => 'nullable|exists:master_pegawai,pegawai_id',
+        ];
+
+        // Relax validation constraints if registering an employee (some fields might be null/empty in master_pegawai)
+        if ($request->has('pegawai_id') && !empty($request->input('pegawai_id'))) {
+            $rules['tempat_lahir'] = 'nullable|string|max:255';
+            $rules['tgllahir'] = 'nullable|date';
+            $rules['jenis_kelamin'] = 'nullable|string';
+            $rules['agama'] = 'nullable|string';
+            $rules['statusperkawinan'] = 'nullable|string';
+            $rules['gol_darah'] = 'nullable|string';
+            $rules['rhesus'] = 'nullable|string';
+            $rules['propinsi_id'] = 'nullable|exists:provinsi,id';
+            $rules['kabupaten_id'] = 'nullable|exists:kabupaten,id';
+            $rules['kecamatan_id'] = 'nullable|exists:kecamatan,id';
+            $rules['kelurahan_id'] = 'nullable|exists:kelurahan,id';
+        }
+
+        $validated = $request->validate($rules);
 
         // Generate automatic no_pendonor: UTD + Ymd + 5 digit counter
         $todayStr = date('Ymd');
@@ -63,28 +81,89 @@ class PendonorController extends Controller
         $pendonor->jenisidentitas = $validated['jenisidentitas'];
         $pendonor->no_identitas = $validated['no_identitas'];
         $pendonor->nama_lengkap = $validated['nama_lengkap'];
-        $pendonor->tempat_lahir = $validated['tempat_lahir'];
-        $pendonor->tgllahir = $validated['tgllahir'];
-        $pendonor->jenis_kelamin = $validated['jenis_kelamin'];
+        $pendonor->tempat_lahir = $validated['tempat_lahir'] ?? null;
+        $pendonor->tgllahir = $validated['tgllahir'] ?? null;
+        $pendonor->jenis_kelamin = $validated['jenis_kelamin'] ?? null;
         $pendonor->pekerjaan_id = $validated['pekerjaan_id'];
-        $pendonor->agama = $validated['agama'];
-        $pendonor->statusperkawinan = $validated['statusperkawinan'];
-        $pendonor->gol_darah = $validated['gol_darah'];
-        $pendonor->rhesus = $validated['rhesus'];
+        $pendonor->agama = $validated['agama'] ?? null;
+        $pendonor->statusperkawinan = $validated['statusperkawinan'] ?? null;
+        $pendonor->gol_darah = $validated['gol_darah'] ?? null;
+        $pendonor->rhesus = $validated['rhesus'] ?? null;
         $pendonor->tinggibadan_cm = $validated['tinggibadan_cm'];
         $pendonor->beratbadan_kg = $validated['beratbadan_kg'];
         $pendonor->alamat_lengkap = $validated['alamat_lengkap'];
-        $pendonor->propinsi_id = $validated['propinsi_id']; // matches propinsi_id column
-        $pendonor->kabupaten_id = $validated['kabupaten_id'];
-        $pendonor->kecamatan_id = $validated['kecamatan_id'];
-        $pendonor->kelurahan_id = $validated['kelurahan_id'];
+        $pendonor->propinsi_id = $validated['propinsi_id'] ?? null; // matches propinsi_id column
+        $pendonor->kabupaten_id = $validated['kabupaten_id'] ?? null;
+        $pendonor->kecamatan_id = $validated['kecamatan_id'] ?? null;
+        $pendonor->kelurahan_id = $validated['kelurahan_id'] ?? null;
         $pendonor->nomobile_pendonor = $validated['no_mobile']; // matches nomobile_pendonor column
+        $pendonor->pegawai_id = $validated['pegawai_id'] ?? null;
         $pendonor->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Registrasi Berhasil!',
             'data' => $pendonor
+        ]);
+    }
+
+    /**
+     * Verify NIP and Password for an employee.
+     */
+    public function verifyPegawai(Request $request)
+    {
+        $validated = $request->validate([
+            'nomorindukpegawai' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $pegawai = \App\Models\Pegawai::where('nomorindukpegawai', $validated['nomorindukpegawai'])->first();
+        if (!$pegawai) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor Induk Pegawai (NIP) tidak terdaftar.'
+            ], 404);
+        }
+
+        $user = \App\Models\User::where('pegawai_id', $pegawai->pegawai_id)->first();
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password salah.'
+            ], 401);
+        }
+
+        $pekerjaan = \App\Models\Pekerjaan::where('pekerjaan_nama', 'Pegawai Rumah Sakit')->first();
+
+        // Standardize gender for front-end presentation
+        $genderFormatted = 'Laki-laki';
+        if (strtoupper($pegawai->jeniskelamin) === 'PEREMPUAN') {
+            $genderFormatted = 'Perempuan';
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'pegawai_id' => $pegawai->pegawai_id,
+                'nama' => $pegawai->nama_pegawai,
+                'nik' => $pegawai->noidentitas,
+                'tempat_lahir' => $pegawai->tempatlahir_pegawai,
+                'tgllahir' => $pegawai->tgl_lahirpegawai,
+                'jenis_kelamin' => $genderFormatted,
+                'pekerjaan_id' => $pekerjaan ? $pekerjaan->pekerjaan_id : null,
+                'agama' => $pegawai->agama,
+                'statusperkawinan' => $pegawai->statusperkawinan,
+                'gol_darah' => $pegawai->golongandarah,
+                'rhesus' => $pegawai->rhesus,
+                'tinggibadan' => $pegawai->tinggibadan,
+                'beratbadan' => $pegawai->beratbadan,
+                'provinsi_id' => $pegawai->provinsi_id,
+                'kabupaten_id' => $pegawai->kabupaten_id,
+                'kecamatan_id' => $pegawai->kecamatan_id,
+                'kelurahan_id' => $pegawai->kelurahan_id,
+                'alamat_lengkap' => $pegawai->alamat_pegawai,
+                'no_mobile' => $pegawai->notelp_pegawai,
+            ]
         ]);
     }
 

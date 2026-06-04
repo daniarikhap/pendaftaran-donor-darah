@@ -135,6 +135,52 @@
         </div>
     </div>
 
+    <!-- VERIFY PEGAWAI MODAL -->
+    <div id="verifyPegawaiModal" class="hidden fixed inset-0 z-[1050] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition duration-150">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden animate-scale-up">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-rose-500 to-pink-600 p-6 text-white flex justify-between items-center">
+                <h3 class="font-extrabold text-lg">Verifikasi Akun Pegawai</h3>
+                <button type="button" onclick="closeVerifyPegawaiModal()" class="text-white/80 hover:text-white transition duration-150 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="formVerifyPegawai" class="p-6 space-y-4" novalidate>
+                <!-- NIP Input -->
+                <div class="space-y-1.5">
+                    <label for="verify_nomorindukpegawai" class="block font-bold text-xs text-slate-700">Nomor Induk Pegawai (NIP) <span class="text-rose-500 font-extrabold">*</span></label>
+                    <input id="verify_nomorindukpegawai" type="text" required
+                        class="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 text-sm"
+                        placeholder="Nomor Induk Pegawai (NIP)" />
+                </div>
+
+                <!-- Password Input -->
+                <div class="space-y-1.5">
+                    <label for="verify_password" class="block font-bold text-xs text-slate-700">Password <span class="text-rose-500 font-extrabold">*</span></label>
+                    <input id="verify_password" type="password" required
+                        class="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 text-sm"
+                        placeholder="Password" />
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeVerifyPegawaiModal()"
+                        class="py-2.5 px-5 text-sm font-bold rounded-xl border border-slate-200 text-slate-650 hover:bg-slate-50 transition duration-150 focus:outline-none">
+                        BATAL
+                    </button>
+                    <button type="submit"
+                        class="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition duration-150 focus:outline-none text-sm">
+                        VERIFIKASI
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Pass backend variables to external javascript -->
     <script>
         const existingDonors = @json($pendonors);

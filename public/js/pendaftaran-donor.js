@@ -356,6 +356,17 @@ function validateFields(formId) {
 }
 
 // 7. Search NIP logic
+function openVerifyPegawaiModal() {
+    const nipVal = document.getElementById('pegawai_nip_search').value.trim();
+    document.getElementById('verify_nomorindukpegawai').value = nipVal;
+    document.getElementById('verify_password').value = '';
+    document.getElementById('verifyPegawaiModal').classList.remove('hidden');
+}
+
+function closeVerifyPegawaiModal() {
+    document.getElementById('verifyPegawaiModal').classList.add('hidden');
+}
+
 function searchNipPegawai() {
     const nipVal = document.getElementById('pegawai_nip_search').value.trim();
     if (!nipVal) {
@@ -366,39 +377,151 @@ function searchNipPegawai() {
         });
         return;
     }
+    openVerifyPegawaiModal();
+}
 
-    const matchedPegawai = mockPegawaiList.find(peg => peg.nip === nipVal);
+// Verification Form listener
+document.addEventListener('DOMContentLoaded', function() {
+    const formVerify = document.getElementById('formVerifyPegawai');
+    if (formVerify) {
+        formVerify.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nipVal = document.getElementById('verify_nomorindukpegawai').value.trim();
+            const passVal = document.getElementById('verify_password').value;
 
-    if (matchedPegawai) {
-        // Auto-fill values
-        document.getElementById('pegawai_nama').value = matchedPegawai.nama;
-        document.getElementById('pegawai_nik').value = matchedPegawai.nik;
-        document.getElementById('pegawai_tempat_lahir').value = matchedPegawai.tempat_lahir;
-        document.getElementById('pegawai_tgllahir').value = matchedPegawai.tgllahir;
-        document.getElementById('pegawai_jenis_kelamin').value = matchedPegawai.jenis_kelamin;
+            if (!nipVal || !passVal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Harap isi NIP dan Password.'
+                });
+                return;
+            }
 
-        // Unlock manual inputs
-        document.getElementById('pegawaiAutoFields').classList.remove('opacity-50', 'pointer-events-none');
-        document.getElementById('pegawaiManualFields').classList.remove('hidden');
+            Swal.fire({
+                title: 'Memverifikasi...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-        // Enable submit button
-        const submitBtn = document.getElementById('btnSubmitPegawai');
-        submitBtn.disabled = false;
-        submitBtn.className = "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold py-2.5 px-8 rounded-xl shadow-md transition duration-150 focus:outline-none text-sm";
+            fetch('/api/verify-pegawai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    nomorindukpegawai: nipVal,
+                    password: passVal
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    const data = res.data;
+                    // Autofill values in formPegawai
+                    document.getElementById('pegawai_nama').value = data.nama;
+                    document.getElementById('pegawai_nik').value = data.nik;
+                    document.getElementById('pegawai_tempat_lahir').value = data.tempat_lahir;
+                    document.getElementById('pegawai_tgllahir').value = data.tgllahir;
+                    document.getElementById('pegawai_jenis_kelamin').value = data.jenis_kelamin;
 
-        Swal.fire({
-            icon: 'success',
-            title: 'Pegawai Ditemukan',
-            text: `Data Pegawai atas nama ${matchedPegawai.nama} berhasil dimuat!`
-        });
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: 'Data Tidak Ditemukan',
-            text: 'Nomor Induk Pegawai (NIP) tidak terdaftar.'
+                    // Autofill hidden inputs
+                    document.getElementById('pegawai_pegawai_id').value = data.pegawai_id;
+                    document.getElementById('pegawai_pekerjaan_id').value = data.pekerjaan_id;
+                    document.getElementById('pegawai_agama').value = data.agama;
+                    document.getElementById('pegawai_statusperkawinan').value = data.statusperkawinan;
+                    document.getElementById('pegawai_gol_darah').value = data.gol_darah;
+                    document.getElementById('pegawai_rhesus').value = data.rhesus;
+                    document.getElementById('pegawai_propinsi_id').value = data.provinsi_id;
+                    document.getElementById('pegawai_kabupaten_id').value = data.kabupaten_id;
+                    document.getElementById('pegawai_kecamatan_id').value = data.kecamatan_id;
+                    document.getElementById('pegawai_kelurahan_id').value = data.kelurahan_id;
+
+                    // Autofill height & weight if available in employee record, otherwise let user input
+                    const tinggiInput = document.getElementById('peg_tinggi_badan');
+                    if (data.tinggibadan) {
+                        tinggiInput.value = data.tinggibadan;
+                        tinggiInput.readOnly = true;
+                        tinggiInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm focus:outline-none text-slate-500 cursor-not-allowed";
+                    } else {
+                        tinggiInput.value = '';
+                        tinggiInput.readOnly = false;
+                        tinggiInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150";
+                    }
+
+                    const beratInput = document.getElementById('peg_berat_badan');
+                    if (data.beratbadan) {
+                        beratInput.value = data.beratbadan;
+                        beratInput.readOnly = true;
+                        beratInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm focus:outline-none text-slate-500 cursor-not-allowed";
+                    } else {
+                        beratInput.value = '';
+                        beratInput.readOnly = false;
+                        beratInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150";
+                    }
+
+                    // Autofill address & phone from employee record, otherwise let user input
+                    const alamatInput = document.getElementById('peg_alamat_lengkap');
+                    if (data.alamat_lengkap) {
+                        alamatInput.value = data.alamat_lengkap;
+                        alamatInput.readOnly = true;
+                        alamatInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm focus:outline-none text-slate-500 cursor-not-allowed";
+                    } else {
+                        alamatInput.value = '';
+                        alamatInput.readOnly = false;
+                        alamatInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150";
+                    }
+
+                    const mobileInput = document.getElementById('peg_no_mobile');
+                    if (data.no_mobile) {
+                        mobileInput.value = data.no_mobile;
+                        mobileInput.readOnly = true;
+                        mobileInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm focus:outline-none text-slate-500 cursor-not-allowed";
+                    } else {
+                        mobileInput.value = '';
+                        mobileInput.readOnly = false;
+                        mobileInput.className = "block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150";
+                    }
+
+                    // Unlock manual fields
+                    document.getElementById('pegawaiAutoFields').classList.remove('opacity-50', 'pointer-events-none');
+                    document.getElementById('pegawaiManualFields').classList.remove('hidden');
+
+                    // Enable submit button
+                    const submitBtn = document.getElementById('btnSubmitPegawai');
+                    submitBtn.disabled = false;
+                    submitBtn.className = "bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold py-2.5 px-8 rounded-xl shadow-md transition duration-150 focus:outline-none text-sm";
+
+                    closeVerifyPegawaiModal();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Verifikasi Berhasil',
+                        text: `Data pegawai atas nama ${data.nama} berhasil dimuat!`
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Verifikasi Gagal',
+                        text: res.message || 'NIP atau password salah.'
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Verifikasi Gagal',
+                    text: 'Terjadi kesalahan saat verifikasi.'
+                });
+            });
         });
     }
-}
+});
 
 // 8. Submit Forms validation & messages
 document.getElementById('formLama').addEventListener('submit', function(e) {
@@ -416,7 +539,7 @@ document.getElementById('formLama').addEventListener('submit', function(e) {
     const identitasVal = document.getElementById('lama_identitas_value').value.trim();
     const tglLahirVal = document.getElementById('lama_tgllahir').value;
 
-    const matchedDonor = existingDonors.find(donor => {
+    const matchedDonors = existingDonors.filter(donor => {
         let idMatch = false;
         if (jenisIdentitasVal === 'NIK_KTP') {
             idMatch = donor.no_identitas === identitasVal;
@@ -430,6 +553,10 @@ document.getElementById('formLama').addEventListener('submit', function(e) {
         }
         return idMatch && dbDate === tglLahirVal;
     });
+
+    const matchedDonor = matchedDonors.length > 0 
+        ? matchedDonors.sort((a, b) => (b.pendonor_id || b.id || 0) - (a.pendonor_id || a.id || 0))[0]
+        : null;
 
     if (matchedDonor) {
         Swal.fire({
@@ -526,14 +653,57 @@ document.getElementById('formPegawai').addEventListener('submit', function(e) {
         return;
     }
 
-    const nama = document.getElementById('pegawai_nama').value;
+    const formData = new FormData(this);
+    const payload = {};
+    formData.forEach((value, key) => {
+        payload[key] = value;
+    });
+
     Swal.fire({
-        icon: 'success',
-        title: 'Registrasi Pegawai Berhasil',
-        text: `Pegawai atas nama ${nama} berhasil terdaftar sebagai pendonor.`
-    }).then(() => {
-        resetForm('formPegawai');
-        switchMainTab('lama');
+        title: 'Menyimpan Data...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch('/pendonor', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            existingDonors.push(res.data);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Registrasi Berhasil',
+                text: `Pendonor Baru (Pegawai) atas nama ${res.data.nama_lengkap} berhasil terdaftar dengan nomor pendonor: ${res.data.no_pendonor}`
+            }).then(() => {
+                resetForm('formPegawai');
+                showProfile(res.data);
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Registrasi Gagal',
+                text: res.message || 'Terjadi kesalahan saat menyimpan data.'
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Registrasi Gagal',
+            text: 'Koneksi ke server terputus atau terjadi kesalahan server.'
+        });
     });
 });
 

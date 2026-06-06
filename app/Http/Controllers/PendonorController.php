@@ -176,19 +176,34 @@ class PendonorController extends Controller
             'nama_lengkap' => 'required|string|max:255',
             'alamat_lengkap' => 'required|string',
             'nomobile_pendonor' => 'required|string|max:50',
+            'gol_darah' => 'nullable|string|max:5',
+            'rhesus' => 'nullable|string|max:10',
         ]);
 
-        $pendonor = Pendonor::findOrFail($id);
-        $pendonor->nama_lengkap = $validated['nama_lengkap'];
-        $pendonor->alamat_lengkap = $validated['alamat_lengkap'];
-        $pendonor->nomobile_pendonor = $validated['nomobile_pendonor'];
-        $pendonor->save();
+        try {
+            // Find by primary key (pendonor_id) or by no_pendonor
+            $pendonor = Pendonor::where('pendonor_id', $id)
+                                ->orWhere('no_pendonor', $id)
+                                ->firstOrFail();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Profil Berhasil Diperbarui!',
-            'data' => $pendonor
-        ]);
+            $pendonor->nama_lengkap = $validated['nama_lengkap'];
+            $pendonor->alamat_lengkap = $validated['alamat_lengkap'];
+            $pendonor->nomobile_pendonor = $validated['nomobile_pendonor'];
+            $pendonor->gol_darah = $request->input('gol_darah') ?: null;
+            $pendonor->rhesus = $request->input('rhesus') ?: null;
+            $pendonor->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil Berhasil Diperbarui!',
+                'data' => $pendonor
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

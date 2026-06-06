@@ -13,7 +13,10 @@ Route::get('/', function () {
     $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
     $pendonors = Pendonor::all();
     $provinsis = \App\Models\Provinsi::all();
-    return view('pendaftaran-donordarah.Pendonor.welcome', compact('pekerjaans', 'pendonors', 'provinsis'));
+    $ruangans = Ruangan::all();
+    $kuesioners = KuesionerDonor::where('kuesioner_aktif', true)->orderBy('kuesioner_urutan', 'asc')->get();
+    
+    return view('pendaftaran-donordarah.Pendonor.welcome', compact('pekerjaans', 'pendonors', 'provinsis', 'ruangans', 'kuesioners'));
 });
 
 Route::post('/pendonor', [\App\Http\Controllers\PendonorController::class, 'store'])->name('pendonor.store');

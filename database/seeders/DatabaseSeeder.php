@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\KuesionerDonor;
 use App\Models\User;
 use App\Models\Pegawai;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -477,5 +479,109 @@ class DatabaseSeeder extends Seeder
             'ruangan_singkatan' => 'UTD Main',
             'pekerjaan_aktif' => true,
         ]);
+
+        $dataKuesioner = [
+            [
+                'kuesioner_urutan' => 1,
+                'kuesioner_desc' => 'Apakah saat ini anda merasa sehat?',
+            ],
+            [
+                'kuesioner_urutan' => 2,
+                'kuesioner_desc' => 'Apakah anda cukup tidur?',
+            ],
+            [
+                'kuesioner_urutan' => 3,
+                'kuesioner_desc' => 'Apakah anda makan dalam 30-60 menit terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 4,
+                'kuesioner_desc' => 'Apakah anda diare dalam 7 hari terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 5,
+                'kuesioner_desc' => 'Apakah anda mengalami penurunan berat badan tanpa sebab yang jelas dalam 3 bulan terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 6,
+                'kuesioner_desc' => 'Apakah anda minum aspirin atau obat nyeri lain dalam 3 hari terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 7,
+                'kuesioner_desc' => 'Apakah saat ini anda sedang minum antibiotik?',
+            ],
+            [
+                'kuesioner_urutan' => 8,
+                'kuesioner_desc' => 'Apakah dalam 7 hari terakhir anda minum antiniotik?',
+            ],
+            [
+                'kuesioner_urutan' => 9,
+                'kuesioner_desc' => 'Apakah anda penderita asma, epilepsi, penyakit kulit, batuk lama, TBC, alergi, tekanan darah tinggi, kencing manis, penyakit jantung, penyakit ginjal, kelainan tiroid, kanker atau kelainan darah?',
+            ],
+            [
+                'kuesioner_urutan' => 10,
+                'kuesioner_desc' => 'Apakah anda atau seorang dalam keluarga anda pernah menderita hepatitis?',
+            ],
+            [
+                'kuesioner_urutan' => 11,
+                'kuesioner_desc' => 'Apakah anda melakukan pengobatan gigi dalam 3 (tiga) hari terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 12,
+                'kuesioner_desc' => 'Apakah anda atau pasangan anda berisiko atau sedang dalam pengobatan penyakit menular seksual, termasuk di dalamnya berisiko terhadap HIV?',
+            ],
+            [
+                'kuesioner_urutan' => 13,
+                'kuesioner_desc' => 'Apakah anda dioperasi besar dalam 6 (enam) bulan terakhir atau kecil dalam 1 (satu) bulan terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 14,
+                'kuesioner_desc' => 'Apakah anda pernah tindik / tato / akupuntur dalam 12 bulan terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 15,
+                'kuesioner_desc' => 'Apakah anda mempunyai riwayat sebagai pengguna obat-obatan atau pernah dipenjara dalam 3 (tiga) tahun terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 16,
+                'kuesioner_desc' => 'Apakah anda pernah ditransfusi darah dalam 1 (satu) tahun terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 17,
+                'kuesioner_desc' => 'Apakah anda mendapat vaksinasi / imunisasi dalam 1 (satu) tahun terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 18,
+                'kuesioner_desc' => 'Apakah anda mengunjungi daerah malaria dalam 1 (satu) tahun terakhir atau pernah menderita malaria dalam 3 (tiga) tahun terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 19,
+                'kuesioner_desc' => 'Apakah anda mengalami masalah saat donasi terakhir?',
+            ],
+            [
+                'kuesioner_urutan' => 20,
+                'kuesioner_desc' => 'Apakah anda sedang menstruasi sekarang?',
+            ],
+            [
+                'kuesioner_urutan' => 21,
+                'kuesioner_desc' => 'Apakah anda sehabis melahirkan 6 (enam) bulan dari sekarang?',
+            ],
+            [
+                'kuesioner_urutan' => 22,
+                'kuesioner_desc' => 'Apakah anda menyusui bayi kurang dari 6 bulan (asi eksklusif)?',
+            ],
+        ];
+
+        $now = Carbon::now();
+
+        foreach ($dataKuesioner as $data) {
+            KuesionerDonor::create(array_merge($data, [
+                'kuesioner_aktif' => true,
+                'create_time' => $now,
+                'update_time' => $now,
+                'create_loginpemakai_id' => 1, // Berikan nilai default ID pemakai seeder
+                'update_loginpemakai_id' => 1,
+                'create_ruangan' => 1,         // Berikan nilai default ID ruangan seeder
+            ]));
+        }
     }
 }

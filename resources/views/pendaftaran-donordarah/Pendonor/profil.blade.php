@@ -27,8 +27,16 @@
 
         <!-- Name & ID -->
         <div class="flex-1 text-center sm:text-left space-y-1">
-            <div class="flex items-center justify-center sm:justify-start space-x-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start sm:space-x-4">
                 <h3 id="profileName" class="text-lg font-black text-slate-800"></h3>
+                <!-- Blood Type Badge (New) -->
+                <div id="bloodBadge" class="hidden items-center space-x-2 bg-rose-50 px-3 py-1 rounded-xl border border-rose-100 mt-2 sm:mt-0 self-center sm:self-auto">
+                    <svg class="w-3.5 h-3.5 text-rose-500 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2.152C12 2.152 4 11 4 16a8 8 0 1 0 16 0c0-5-8-13.848-8-13.848z"/>
+                    </svg>
+                    <span id="profileGolDarah" class="text-xs font-black text-rose-600 uppercase"></span>
+                    <span id="profileRhesus" class="text-xs font-bold text-rose-400 uppercase"></span>
+                </div>
             </div>
             <p id="profileNoPendonor" class="text-sm font-semibold text-slate-500"></p>
             <div class="pt-2 text-xs text-slate-450 space-y-0.5">
@@ -105,6 +113,73 @@
     </div>
 </div>
 
+<!-- HISTORY CONTAINER (Hidden by default) -->
+<div id="historyContainer" class="hidden w-full space-y-6 animate-fade-in">
+    <!-- Header -->
+    <div class="flex items-center border-b border-slate-100 pb-4 relative">
+        <button type="button" id="btnBackHistory"
+            class="flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 border border-rose-200 bg-rose-50/30 hover:bg-rose-50 hover:border-rose-300 transition duration-150 shadow-sm focus:outline-none">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Kembali</span>
+        </button>
+        <h2 class="absolute left-1/2 -translate-x-1/2 text-xl font-extrabold text-rose-600">Riwayat Donor</h2>
+    </div>
+
+    <!-- Date Range Filter Card -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 p-6">
+        <div class="flex flex-col space-y-2">
+            <label class="text-sm font-semibold text-slate-700">Pilih Rentang Tanggal</label>
+            <div class="flex items-center space-x-3">
+                <div class="relative flex-1 max-w-sm">
+                    <input type="text" id="dateRangePicker"
+                        class="w-full rounded-xl border-slate-200 focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50 text-sm transition duration-150 pl-4 pr-10 py-2.5"
+                        placeholder="01-06-2026 ~ 06-06-2026">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
+                <button type="button"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition duration-150 shadow-sm">
+                    Tampilkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 p-6">
+        <div class="overflow-x-auto rounded-xl border border-slate-100 p-1">
+            <table id="historyTable" class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th
+                            class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-16 text-center">
+                            No</th>
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tgl Pendaftaran
+                        </th>
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">No. Formulir</th>
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Ruangan
+                            Rekrutmen</th>
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Jenis
+                            Pendaftaran</th>
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status Donor</th>
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Seleksi Donor
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- EDIT PROFILE MODAL -->
 <div id="editProfileModal"
     class="hidden fixed inset-0 z-[1050] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition duration-150">
@@ -151,6 +226,30 @@
                 <input id="edit_nomobile_pendonor" type="text" name="nomobile_pendonor" required
                     class="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400 text-sm"
                     placeholder="Nomor Telepon" />
+            </div>
+
+            <!-- Golongan Darah & Rhesus (New) -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label for="edit_gol_darah" class="block font-bold text-xs text-slate-700">Golongan Darah</label>
+                    <select id="edit_gol_darah" name="gol_darah"
+                        class="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 text-sm">
+                        <option value="">Pilih</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label for="edit_rhesus" class="block font-bold text-xs text-slate-700">Rhesus</label>
+                    <select id="edit_rhesus" name="rhesus"
+                        class="block w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 text-sm">
+                        <option value="">Pilih</option>
+                        <option value="Positif">Positif (+)</option>
+                        <option value="Negatif">Negatif (-)</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Action Buttons -->

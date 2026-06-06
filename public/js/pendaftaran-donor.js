@@ -12,6 +12,7 @@ const mockPegawaiList = [
 
 // 1. Main Tab Switch (Lama vs Baru)
 function switchMainTab(tab) {
+    localStorage.setItem('pendaftaran_donor_mainTab', tab);
     const tabLama = document.getElementById('tabLama');
     const tabBaru = document.getElementById('tabBaru');
     const secLama = document.getElementById('sectionLama');
@@ -32,6 +33,7 @@ function switchMainTab(tab) {
 
 // 2. Sub-Tab Switch (Pegawai vs Umum)
 function switchSubTab(sub) {
+    localStorage.setItem('pendaftaran_donor_subTab', sub);
     const tabPegawai = document.getElementById('subTabPegawai');
     const tabUmum = document.getElementById('subTabUmum');
     const secPegawai = document.getElementById('sectionPegawai');
@@ -155,7 +157,62 @@ document.addEventListener('DOMContentLoaded', function() {
         const event = new Event('change', { bubbles: true });
         this.dispatchEvent(event);
     });
+
+    // Restore state from localStorage
+    restoreState();
 });
+
+function restoreState() {
+    const savedDonor = localStorage.getItem('pendaftaran_donor_activeDonor');
+    if (savedDonor) {
+        try {
+            const donor = JSON.parse(savedDonor);
+            showProfile(donor);
+            
+            // Check if we were in history view
+            const currentView = localStorage.getItem('pendaftaran_donor_view');
+            if (currentView === 'history') {
+                showHistoryView();
+            }
+
+            // Check if we were in pendaftaran view
+            const isPendaftaran = localStorage.getItem('pendaftaran_donor_isPendaftaran');
+            if (isPendaftaran === 'true') {
+                document.getElementById('btnDaftarDonorProfile').click();
+            }
+            return; 
+        } catch (e) {
+            console.error('Failed to parse saved donor', e);
+        }
+    }
+
+    const mainTab = localStorage.getItem('pendaftaran_donor_mainTab');
+    if (mainTab) {
+        switchMainTab(mainTab);
+    }
+
+    const subTab = localStorage.getItem('pendaftaran_donor_subTab');
+    if (subTab) {
+        switchSubTab(subTab);
+    }
+
+    const stepUmum = localStorage.getItem('pendaftaran_donor_stepUmum');
+    if (stepUmum && mainTab === 'baru' && subTab === 'umum') {
+        // We might need to check validity if we want to restore step 2 directly
+        // but for now let's just go to step if possible
+        if (parseInt(stepUmum) === 2) {
+            // Check if step 1 is valid before going to step 2
+            checkStep1Validity();
+            if (isStep1Valid) {
+                goToStep(2);
+            } else {
+                goToStep(1);
+            }
+        } else {
+            goToStep(1);
+        }
+    }
+}
 
 // Cascading Dropdowns Logic
 function setupCascadingDropdowns() {
@@ -228,6 +285,7 @@ function setupCascadingDropdowns() {
 function goToStep(step) {
     if (step === 2 && !isStep1Valid) return;
 
+    localStorage.setItem('pendaftaran_donor_stepUmum', step);
     currentStepUmum = step;
     const divPribadi = document.getElementById('divPribadi');
     const divAlamat = document.getElementById('divAlamat');
@@ -610,7 +668,12 @@ document.getElementById('formUmum').addEventListener('submit', function(e) {
         },
         body: JSON.stringify(payload)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error(text) });
+        }
+        return res.json();
+    })
     .then(res => {
         if (res.success) {
             // Add newly registered donor to existingDonors array
@@ -723,6 +786,7 @@ function formatDateIndo(dateInput) {
 
 function showProfile(donor) {
     activeDonor = donor;
+    localStorage.setItem('pendaftaran_donor_activeDonor', JSON.stringify(donor));
     
     // Hide branding panel and make right panel full width
     document.getElementById('leftBrandingPanel').classList.add('hidden');
@@ -740,6 +804,27 @@ function showProfile(donor) {
     document.getElementById('profileAlamat').textContent = donor.alamat_lengkap || '-';
     document.getElementById('profileNoTelp').textContent = donor.nomobile_pendonor || donor.notelp_pendonor || '-';
 
+    // Populate Blood Type & Rhesus (New)
+    const bloodBadge = document.getElementById('bloodBadge');
+    const profileGolDarah = document.getElementById('profileGolDarah');
+    const profileRhesus = document.getElementById('profileRhesus');
+
+    if (donor.gol_darah) {
+        bloodBadge.classList.remove('hidden');
+        bloodBadge.classList.add('flex');
+        profileGolDarah.textContent = donor.gol_darah;
+        
+        let rhesusText = '';
+         if (donor.rhesus === 'POS' || donor.rhesus === 'Positif') rhesusText = '+';
+         else if (donor.rhesus === 'NEG' || donor.rhesus === 'Negatif') rhesusText = '-';
+         else rhesusText = donor.rhesus || '';
+        
+        profileRhesus.textContent = rhesusText;
+    } else {
+        bloodBadge.classList.add('hidden');
+        bloodBadge.classList.remove('flex');
+    }
+
     // Populate metrics
     const totalDonasi = donor.donasi_ke || 0;
     document.getElementById('metricTotalDonor').textContent = `${totalDonasi} Kali`;
@@ -755,6 +840,12 @@ function showProfile(donor) {
 // Exit button
 document.getElementById('btnKeluarProfile').addEventListener('click', function() {
     activeDonor = null;
+    localStorage.removeItem('pendaftaran_donor_activeDonor');
+    localStorage.removeItem('pendaftaran_donor_mainTab');
+    localStorage.removeItem('pendaftaran_donor_subTab');
+    localStorage.removeItem('pendaftaran_donor_stepUmum');
+    localStorage.removeItem('pendaftaran_donor_isPendaftaran');
+    localStorage.removeItem('pendaftaran_donor_view');
     
     // Reset all form inputs
     resetForm('formLama');
@@ -769,6 +860,7 @@ document.getElementById('btnKeluarProfile').addEventListener('click', function()
     rightPanel.classList.remove('lg:w-full');
     
     document.getElementById('profileContainer').classList.add('hidden');
+    document.getElementById('historyContainer').classList.add('hidden');
     document.getElementById('welcomeFormContainer').classList.remove('hidden');
 
     Swal.fire({
@@ -787,6 +879,13 @@ document.getElementById('btnEditProfile').addEventListener('click', function() {
     document.getElementById('edit_nama_lengkap').value = activeDonor.nama_lengkap;
     document.getElementById('edit_alamat_lengkap').value = activeDonor.alamat_lengkap || '';
     document.getElementById('edit_nomobile_pendonor').value = activeDonor.nomobile_pendonor || '';
+    document.getElementById('edit_gol_darah').value = activeDonor.gol_darah || '';
+    
+    // Normalisasi value rhesus untuk select modal
+    let rhesusVal = activeDonor.rhesus || '';
+    if (rhesusVal === 'POS') rhesusVal = 'Positif';
+    if (rhesusVal === 'NEG') rhesusVal = 'Negatif';
+    document.getElementById('edit_rhesus').value = rhesusVal;
     
     document.getElementById('editProfileModal').classList.remove('hidden');
 });
@@ -808,10 +907,21 @@ document.getElementById('formEditProfile').addEventListener('submit', function(e
     }
 
     const donorId = document.getElementById('edit_pendonor_id').value;
+    if (!donorId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan',
+            text: 'ID Pendonor tidak ditemukan. Silakan muat ulang halaman.'
+        });
+        return;
+    }
+
     const payload = {
         nama_lengkap: document.getElementById('edit_nama_lengkap').value,
         alamat_lengkap: document.getElementById('edit_alamat_lengkap').value,
-        nomobile_pendonor: document.getElementById('edit_nomobile_pendonor').value
+        nomobile_pendonor: document.getElementById('edit_nomobile_pendonor').value,
+        gol_darah: document.getElementById('edit_gol_darah').value,
+        rhesus: document.getElementById('edit_rhesus').value
     };
 
     Swal.fire({
@@ -831,7 +941,15 @@ document.getElementById('formEditProfile').addEventListener('submit', function(e
         },
         body: JSON.stringify(payload)
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => {
+                console.error('Server error response:', text);
+                throw new Error('Server returned ' + res.status);
+            });
+        }
+        return res.json();
+    })
     .then(res => {
         if (res.success) {
             // Update activeDonor and DOM
@@ -861,10 +979,21 @@ document.getElementById('formEditProfile').addEventListener('submit', function(e
     })
     .catch(err => {
         console.error(err);
+        
+        let errorMsg = 'Terjadi kesalahan saat menghubungi server.';
+        try {
+            // Try to parse JSON from error message if it's a stringified JSON
+            const parsed = JSON.parse(err.message);
+            if (parsed.message) errorMsg = parsed.message;
+        } catch(e) {
+            // If not JSON, use the error message itself if it's simple
+            if (err.message && err.message.length < 100) errorMsg = err.message;
+        }
+
         Swal.fire({
             icon: 'error',
-            title: 'Kesalahan Koneksi',
-            text: 'Terjadi kesalahan saat menghubungi server.'
+            title: 'Kesalahan Simpan',
+            text: errorMsg
         });
     });
 });
@@ -872,48 +1001,103 @@ document.getElementById('formEditProfile').addEventListener('submit', function(e
 // Histori Action
 document.getElementById('btnHistoriProfile').addEventListener('click', function() {
     if (!activeDonor) return;
-    let historyHtml = '';
+    showHistoryView();
+});
+
+// Back from History to Profile
+document.getElementById('btnBackHistory').addEventListener('click', function() {
+    showProfileView();
+});
+
+function showHistoryView() {
+    localStorage.setItem('pendaftaran_donor_view', 'history');
+    document.getElementById('profileContainer').classList.add('hidden');
+    document.getElementById('historyContainer').classList.remove('hidden');
     
-    const donasiKe = activeDonor.donasi_ke || 0;
-    if (donasiKe === 0) {
-        historyHtml = '<p class="text-sm text-slate-550 py-4">Belum ada riwayat donor darah yang tercatat.</p>';
-    } else {
-        historyHtml = `<div class="overflow-x-auto"><table class="w-full text-left text-sm border-collapse">
-            <thead>
-                <tr class="border-b border-slate-100"><th class="py-2 text-slate-400 font-bold text-xs uppercase">No</th><th class="py-2 text-slate-400 font-bold text-xs uppercase">Tanggal Donor</th><th class="py-2 text-slate-400 font-bold text-xs uppercase">Lokasi</th></tr>
-            </thead>
-            <tbody>`;
-        
-        let currentDate = activeDonor.tgl_donor_terakhir ? new Date(activeDonor.tgl_donor_terakhir) : new Date();
-        for (let i = donasiKe; i > 0; i--) {
-            historyHtml += `<tr class="border-b border-slate-50"><td class="py-2.5 font-bold text-slate-700">#${i}</td><td class="py-2.5 text-slate-600">${formatDateIndo(currentDate)}</td><td class="py-2.5 text-slate-550">${activeDonor.tempat_donor_terakhir || 'Unit Transfusi Darah'}</td></tr>`;
-            // Subtract random months for historical simulation
-            currentDate = new Date(currentDate.getTime() - (75 + Math.floor(Math.random() * 20)) * 24 * 60 * 60 * 1000);
-        }
-        historyHtml += '</tbody></table></div>';
+    // Initialize DataTables if not already done
+    if (!$.fn.DataTable.isDataTable('#historyTable')) {
+        $('#historyTable').DataTable({
+            "pageLength": 10,
+            "ordering": true,
+            "info": false,
+            "language": {
+                "paginate": {
+                    "previous": "Sebelumnya",
+                    "next": "Selanjutnya"
+                },
+                "emptyTable": "Tidak ada data pada rentang tanggal ini."
+            }
+        });
     }
 
-    Swal.fire({
-        title: 'Riwayat Donor',
-        html: historyHtml,
-        confirmButtonText: 'Tutup',
-        customClass: {
-            confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-6 rounded-xl transition duration-150 focus:outline-none'
-        },
-        buttonsStyling: false
-    });
-});
+    // Initialize Flatpickr if not already done
+    if (!document.getElementById('dateRangePicker')._flatpickr) {
+        flatpickr("#dateRangePicker", {
+            mode: "range",
+            dateFormat: "d-m-Y",
+            defaultDate: [new Date(new Date().setDate(new Date().getDate() - 5)), new Date()],
+            locale: {
+                rangeSeparator: " ~ "
+            }
+        });
+    }
+}
+
+function showProfileView() {
+    localStorage.removeItem('pendaftaran_donor_view');
+    document.getElementById('historyContainer').classList.add('hidden');
+    document.getElementById('profileContainer').classList.remove('hidden');
+}
 
 // Daftar Donor Action
 document.getElementById('btnDaftarDonorProfile').addEventListener('click', function() {
+    localStorage.setItem('pendaftaran_donor_isPendaftaran', 'true');
+    document.getElementById('mainContentCard').classList.add('hidden');
+    document.getElementById('pendaftaranContainer').classList.remove('hidden');
+    
+    
+    // Initialize Select2 if not already done
+    $('.select2-location').select2({
+        placeholder: "Pilih Lokasi",
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Initialize Flatpickr for Pendaftaran Date
+    if (!document.getElementById('pendaftaran_tgl')._flatpickr) {
+        flatpickr("#pendaftaran_tgl", {
+            dateFormat: "d-m-Y",
+            defaultDate: new Date(),
+            locale: {
+                firstDayOfWeek: 1
+            }
+        });
+    }
+});
+
+// Back to Profile Action
+document.getElementById('btnBackToProfile').addEventListener('click', function() {
+    localStorage.removeItem('pendaftaran_donor_isPendaftaran');
+    document.getElementById('pendaftaranContainer').classList.add('hidden');
+    document.getElementById('mainContentCard').classList.remove('hidden');
+});
+
+// Handle Pendaftaran Form Submission
+document.getElementById('formPendaftaranDonor').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // For now, just show a success message as requested "fungsi daftar donor nanti dulu"
     Swal.fire({
-        icon: 'info',
-        title: 'Pendaftaran Donor',
-        text: 'Anda telah berhasil terdaftar untuk donor hari ini. Silakan kunjungi Unit Transfusi Darah terdekat dengan membawa kartu identitas Anda untuk melanjutkan proses donor.',
-        confirmButtonText: 'Baik, Saya Mengerti',
+        icon: 'success',
+        title: 'Pendaftaran Berhasil',
+        text: 'Data pendaftaran donor Anda telah disimpan. Silakan lanjutkan proses di lokasi donor.',
+        confirmButtonText: 'Selesai',
         customClass: {
-            confirmButton: 'bg-rose-500 hover:bg-rose-650 text-white font-bold py-2 px-6 rounded-xl transition duration-150 focus:outline-none'
+            confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 focus:outline-none'
         },
         buttonsStyling: false
+    }).then(() => {
+        localStorage.removeItem('pendaftaran_donor_isPendaftaran');
+        document.getElementById('btnBackToProfile').click();
     });
 });

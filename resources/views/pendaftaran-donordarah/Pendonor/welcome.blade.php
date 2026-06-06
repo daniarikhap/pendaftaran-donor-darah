@@ -23,6 +23,14 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <!-- Flatpickr (Date Range Picker) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <style>
         /* Select2 Premium Custom Styling to match Tailwind forms */
         .select2-container--default .select2-selection--single {
@@ -74,6 +82,31 @@
             border-color: #f43f5e !important;
             box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2) !important;
         }
+
+        /* DataTables Custom Styling */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            display: none !important;
+        }
+        table.dataTable {
+            border-collapse: collapse !important;
+            width: 100% !important;
+        }
+        table.dataTable border-b {
+            border-bottom: 1px solid rgb(241, 245, 249) !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #e11d48 !important;
+            color: white !important;
+            border: 1px solid #e11d48 !important;
+            border-radius: 8px !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #fda4af !important;
+            color: #9f1239 !important;
+            border: 1px solid #fda4af !important;
+            border-radius: 8px !important;
+        }
     </style>
 </head>
 
@@ -81,7 +114,7 @@
     class="font-sans antialiased bg-gradient-to-tr from-rose-100/40 via-slate-100 to-pink-100/40 min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
 
     <!-- Main Container Card -->
-    <div
+    <div id="mainContentCard"
         class="w-full max-w-6xl bg-white shadow-2xl rounded-3xl overflow-hidden flex flex-col lg:flex-row my-4 border border-rose-100/50">
 
         <!-- Left Panel: Branding & Info -->
@@ -134,6 +167,8 @@
             @include('pendaftaran-donordarah.Pendonor.profil')
         </div>
     </div>
+
+    @include('pendaftaran-donordarah.Pendonor.pendaftaran')
 
     <!-- VERIFY PEGAWAI MODAL -->
     <div id="verifyPegawaiModal" class="hidden fixed inset-0 z-[1050] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition duration-150">

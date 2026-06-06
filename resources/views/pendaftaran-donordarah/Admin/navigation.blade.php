@@ -1,4 +1,4 @@
-<aside x-data="{ sidebarOpen: true, masterOpen: {{ request()->routeIs('kuesioner.*') || request()->routeIs('ruangan.*') || request()->routeIs('pekerjaan.*') ? 'true' : 'false' }}, informasiOpen: false }"
+<aside x-data="{ sidebarOpen: true, masterOpen: {{ request()->routeIs('kuesioner.*') || request()->routeIs('ruangan.*') || request()->routeIs('pekerjaan.*') ? 'true' : 'false' }}, informasiOpen: {{ request()->routeIs('admin.data-donor') ? 'true' : 'false' }} }"
     class="flex flex-col h-screen sticky top-0 bg-slate-900 border-r border-slate-800/60 transition-all duration-300 ease-in-out shrink-0"
     :class="sidebarOpen ? 'w-64' : 'w-20'">
 
@@ -125,8 +125,8 @@
             <div x-show="informasiOpen && sidebarOpen" x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 transform -translate-y-1"
                 x-transition:enter-end="opacity-100 transform translate-y-0" class="mt-1 pl-8 space-y-1">
-                <a href="#"
-                    class="block px-3 py-2 text-sm font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-800/40 rounded-md transition-colors duration-150">
+                <a href="{{ route('admin.data-donor') }}"
+                    class="block px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 {{ request()->routeIs('admin.data-donor') ? 'text-rose-400 bg-rose-500/10 font-semibold' : 'text-slate-400 hover:text-rose-400 hover:bg-slate-800/40' }}">
                     Data Donor
                 </a>
             </div>

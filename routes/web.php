@@ -52,6 +52,10 @@ Route::middleware('auth')->group(function () {
 
     // Pekerjaan CRUD
     Route::resource('pekerjaan', \App\Http\Controllers\PekerjaanController::class)->except(['show']);
+
+    // Data Donor (Admin)
+    Route::get('/admin/data-donor', [\App\Http\Controllers\PendonorController::class, 'indexAdmin'])->name('admin.data-donor');
+    Route::get('/admin/seleksi-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'seleksiDonor'])->name('admin.seleksi-donor');
 });
 
 require __DIR__.'/auth.php';

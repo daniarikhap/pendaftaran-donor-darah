@@ -611,7 +611,7 @@ document.getElementById('formLama').addEventListener('submit', function(e) {
 
     const jenisIdentitasVal = document.getElementById('lama_jenis_identitas').value;
     const identitasVal = document.getElementById('lama_identitas_value').value.trim();
-    const tglLahirVal = document.getElementById('lama_tgllahir').value;
+    const tglLahirVal = document.getElementById('lama_tgllahir').value; // d-m-Y
 
     const matchedDonors = existingDonors.filter(donor => {
         let idMatch = false;
@@ -623,7 +623,12 @@ document.getElementById('formLama').addEventListener('submit', function(e) {
         
         let dbDate = '';
         if (donor.tgllahir) {
-            dbDate = typeof donor.tgllahir === 'string' ? donor.tgllahir.substring(0, 10) : new Date(donor.tgllahir).toISOString().split('T')[0];
+            // Handle YYYY-MM-DD string format directly to avoid timezone shifts
+            const dateStr = typeof donor.tgllahir === 'string' ? donor.tgllahir.substring(0, 10) : new Date(donor.tgllahir).toISOString().split('T')[0];
+            const parts = dateStr.split('-'); // [YYYY, MM, DD]
+            if (parts.length === 3) {
+                dbDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // d-m-Y
+            }
         }
         return idMatch && dbDate === tglLahirVal;
     });

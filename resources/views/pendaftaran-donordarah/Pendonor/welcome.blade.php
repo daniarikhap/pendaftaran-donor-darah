@@ -114,6 +114,27 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
             border: 1px solid #f1f5f9 !important;
             padding: 0.5rem;
+            width: 300px !important;
+        }
+
+        .flatpickr-innerContainer {
+            width: 100% !important;
+        }
+
+        .flatpickr-rContainer {
+            width: 100% !important;
+        }
+
+        .flatpickr-days {
+            width: 100% !important;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dayContainer {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
         }
 
         .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, 

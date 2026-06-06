@@ -373,4 +373,65 @@ class PendonorController extends Controller
             'data' => $riwayat
         ]);
     }
+
+    /**
+     * Display a listing of donor registrations for admin.
+     */
+    public function indexAdmin(Request $request)
+    {
+        $query = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen']);
+
+        if ($request->filled('tgl_pendaftaran')) {
+            // Handle range separator ' ~ ' (custom) or ' to ' (default flatpickr)
+            $dateString = $request->tgl_pendaftaran;
+            $dates = preg_split('/ (to|~) /', $dateString);
+            
+            if (count($dates) === 2) {
+                $query->whereBetween('waktu_pendaftaran', [
+                    trim($dates[0]) . ' 00:00:00',
+                    trim($dates[1]) . ' 23:59:59'
+                ]);
+            } else {
+                $query->whereDate('waktu_pendaftaran', trim($dates[0]));
+            }
+        }
+
+        if ($request->filled('no_formulir')) {
+            $query->where('no_formulir', 'like', '%' . $request->no_formulir . '%');
+        }
+
+        if ($request->filled('no_pendonor')) {
+            $query->whereHas('pendonor', function ($q) use ($request) {
+                $q->where('no_pendonor', 'like', '%' . $request->no_pendonor . '%');
+            });
+        }
+
+        if ($request->filled('nama_pendonor')) {
+            $query->whereHas('pendonor', function ($q) use ($request) {
+                $q->where('nama_lengkap', 'like', '%' . $request->nama_pendonor . '%');
+            });
+        }
+
+        $daftarDonors = $query->orderBy('daftardonor_id', 'desc')->get();
+
+        return view('pendaftaran-donordarah.Admin.data-donor', compact('daftarDonors'));
+    }
+
+    /**
+     * Display the seleksi donor page.
+     */
+    public function seleksiDonor($id)
+    {
+        $donor = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen'])->findOrFail($id);
+        
+        // Get questionnaire answers
+        $jawabanKuesioner = JawabanKuesioner::with('kuesionerdonor')
+            ->where('daftardonor_id', $id)
+            ->get()
+            ->sortBy(function($jawaban) {
+                return $jawaban->kuesionerdonor->kuesioner_urutan;
+            });
+
+        return view('pendaftaran-donordarah.Admin.seleksi-donor', compact('donor', 'jawabanKuesioner'));
+    }
 }

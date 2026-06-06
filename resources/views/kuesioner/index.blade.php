@@ -172,7 +172,7 @@
         $(document).ready(function() {
             var table = $('#kuesionerTable').DataTable({
                 "pageLength": 10,
-                "ordering": true,
+                "ordering": false,
                 "info": false,
                 "language": {
                     "paginate": {

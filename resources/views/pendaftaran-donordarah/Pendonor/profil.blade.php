@@ -143,7 +143,7 @@
                         </svg>
                     </div>
                 </div>
-                <button type="button"
+                <button type="button" id="btnTampilkanRiwayat"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition duration-150 shadow-sm">
                     Tampilkan
                 </button>
@@ -165,10 +165,8 @@
                         <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">No. Formulir</th>
                         <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Ruangan
                             Rekrutmen</th>
-                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Jenis
-                            Pendaftaran</th>
                         <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status Donor</th>
-                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Seleksi Donor
+                        <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Seleksi Donor
                         </th>
                     </tr>
                 </thead>

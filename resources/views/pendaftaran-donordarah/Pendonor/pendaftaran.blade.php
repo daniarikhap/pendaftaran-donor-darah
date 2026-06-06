@@ -18,6 +18,7 @@
 
             <form id="formPendaftaranDonor" class="space-y-8">
                 @csrf
+                <input type="hidden" name="pendonor_id" id="pendaftaran_pendonor_id">
                 <!-- Data Pendaftaran Donor Section -->
                 <div class="bg-slate-50/50 rounded-2xl border border-slate-100 p-6 lg:p-8 space-y-6">
                     <div class="flex items-center space-x-3">

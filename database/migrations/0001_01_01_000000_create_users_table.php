@@ -144,16 +144,21 @@ return new class extends Migration
         Schema::create('daftardonor', function (Blueprint $table) {
             $table->increments('daftardonor_id');
             $table->unsignedInteger('pendonor_id');
-            $table->unsignedInteger('ruangan_id');
             $table->string('no_formulir');
-            $table->integer('nama_petugas_id');
+            $table->string('nama_petugas');
             $table->text('keterangan_donasi')->nullable();
             $table->integer('donasi_ke');
             $table->timestamp('create_time')->nullable();
             $table->timestamp('update_time')->nullable();
+            $table->integer('create_ruangan')->nullable();
             $table->integer('ruangan_rekruitmen_id');
             $table->timestamp('waktu_pendaftaran');
-            $table->string('status');
+            $table->string('status')->comment('Seleksi, Diterima, Ditolak');
+            $table->boolean('bataldonordarah')->default(false);
+            $table->string('gol_darah')->nullable();
+            $table->string('rhesus')->nullable();
+            $table->unsignedInteger('ruangan_id');
+            $table->integer('dpjp_id')->nullable();
             $table->integer('beratbadan_kg');
             $table->integer('tinggibadan_cm');
             $table->timestamps();
@@ -195,13 +200,12 @@ return new class extends Migration
         });
 
         Schema::create('jawaban_kuesioner', function (Blueprint $table) {
-            $table->unsignedInteger('seleksidonor_id');
-            $table->unsignedInteger('daftardonor_id');
-            $table->unsignedInteger('kuesionerdonor_id');
+            $table->unsignedInteger('seleksidonor_id')->nullable();
+            $table->unsignedInteger('daftardonor_id')->nullable();
+            $table->unsignedInteger('kuesionerdonor_id')->nullable();
             $table->boolean('ceklist');
             $table->timestamps();
 
-            $table->primary(['seleksidonor_id', 'kuesionerdonor_id']);
             $table->foreign('seleksidonor_id')->references('seleksidonor_id')->on('seleksidonor')->onDelete('cascade');
             $table->foreign('daftardonor_id')->references('daftardonor_id')->on('daftardonor')->onDelete('cascade');
             $table->foreign('kuesionerdonor_id')->references('kuesionerdonor_id')->on('kuesionerdonor')->onDelete('cascade');

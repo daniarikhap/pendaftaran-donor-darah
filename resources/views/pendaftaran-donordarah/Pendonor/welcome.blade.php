@@ -107,6 +107,36 @@
             border: 1px solid #fda4af !important;
             border-radius: 8px !important;
         }
+
+        /* Flatpickr Premium Custom Styling */
+        .flatpickr-calendar {
+            border-radius: 1.25rem !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid #f1f5f9 !important;
+            padding: 0.5rem;
+        }
+
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, 
+        .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, 
+        .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, 
+        .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, 
+        .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, 
+        .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: #fff !important;
+            border-radius: 50% !important;
+        }
+
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 700 !important;
+            color: #1e293b !important;
+        }
+
+        .flatpickr-day.today {
+            border-color: #3b82f6 !important;
+            color: #3b82f6 !important;
+        }
     </style>
 </head>
 

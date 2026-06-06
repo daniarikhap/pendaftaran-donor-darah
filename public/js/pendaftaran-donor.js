@@ -146,6 +146,22 @@ document.addEventListener('DOMContentLoaded', function() {
     setupValidationListeners();
     setupCascadingDropdowns();
 
+    // Initialize Flatpickr for Birthday fields with Month/Year dropdowns
+    const birthdayConfig = {
+        dateFormat: "d-m-Y",
+        altInput: false,
+        allowInput: true,
+        monthSelectorType: 'dropdown',
+        yearSelectorType: 'dropdown',
+        maxDate: "today",
+        locale: {
+            firstDayOfWeek: 1
+        }
+    };
+
+    flatpickr("#lama_tgllahir", birthdayConfig);
+    flatpickr("#umum_tgllahir", birthdayConfig);
+
     // Initialize Select2 on requested fields
     $('#lama_jenis_identitas, #umum_jenisidentitas, #umum_provinsi, #umum_kabupaten, #umum_kecamatan, #umum_kelurahan, #umum_pekerjaan_id, #umum_agama, #umum_status_perkawinan, #umum_gol_darah').select2({
         width: '100%'
@@ -826,7 +842,7 @@ function showProfile(donor) {
     }
 
     // Populate metrics
-    const totalDonasi = donor.donasi_ke || 0;
+    const totalDonasi = donor.total_donor_diterima || 0;
     document.getElementById('metricTotalDonor').textContent = `${totalDonasi} Kali`;
     
     document.getElementById('metricDonorTerakhir').textContent = formatDateIndo(donor.tgl_donor_terakhir);
@@ -1018,7 +1034,7 @@ function showHistoryView() {
     if (!$.fn.DataTable.isDataTable('#historyTable')) {
         $('#historyTable').DataTable({
             "pageLength": 10,
-            "ordering": true,
+            "ordering": false,
             "info": false,
             "language": {
                 "paginate": {
@@ -1026,6 +1042,48 @@ function showHistoryView() {
                     "next": "Selanjutnya"
                 },
                 "emptyTable": "Tidak ada data pada rentang tanggal ini."
+            },
+            "columnDefs": [
+                {
+                    "targets": 0, // Kolom NO
+                    "className": "text-center py-4 px-4 text-sm font-bold text-slate-400"
+                }
+            ],
+            "columns": [
+                { "data": null },
+                { "data": "waktu_pendaftaran", "className": "py-4 px-4 text-sm text-slate-700 font-medium" },
+                { "data": "no_formulir", "className": "py-4 px-4 text-sm text-slate-700 font-medium" },
+                { "data": "ruangan_nama", "className": "py-4 px-4 text-sm text-slate-700 font-medium" },
+                { "data": "status_donor", "className": "py-4 px-4 text-sm text-slate-700 font-medium" },
+                { "data": "status", "className": "py-4 px-4 text-sm text-slate-700 font-medium text-center" }
+            ],
+            "createdRow": function(row, data, dataIndex) {
+                // Auto-increment Number
+                $('td:eq(0)', row).html(dataIndex + 1);
+                
+                // Format Date: 06-06-2026
+                if (data.waktu_pendaftaran) {
+                    const date = new Date(data.waktu_pendaftaran);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    $('td:eq(1)', row).html(`${day}-${month}-${year}`);
+                }
+
+                // Status Badge Styling
+                const status = data.status;
+                let badgeClass = '';
+                if (status === 'Proses') {
+                    badgeClass = 'bg-blue-100 text-blue-600 border-blue-200';
+                } else if (status === 'Ditolak') {
+                    badgeClass = 'bg-rose-100 text-rose-600 border-rose-200';
+                } else if (status === 'Diterima') {
+                    badgeClass = 'bg-emerald-100 text-emerald-600 border-emerald-200';
+                }
+
+                if (badgeClass) {
+                    $('td:eq(5)', row).html(`<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${badgeClass}">${status}</span>`);
+                }
             }
         });
     }
@@ -1041,7 +1099,58 @@ function showHistoryView() {
             }
         });
     }
+
+    // Automatically load data when history view is shown
+    loadHistoryData();
 }
+
+function loadHistoryData() {
+    if (!activeDonor) return;
+
+    const dateRange = document.getElementById('dateRangePicker').value;
+    if (!dateRange || !dateRange.includes(' ~ ')) return;
+
+    const [startStr, endStr] = dateRange.split(' ~ ');
+    
+    // Convert d-m-Y to Y-m-d for backend
+    const startParts = startStr.split('-');
+    const endParts = endStr.split('-');
+    const startDate = `${startParts[2]}-${startParts[1]}-${startParts[0]}`;
+    const endDate = `${endParts[2]}-${endParts[1]}-${endParts[0]}`;
+
+    const pendonorId = activeDonor.pendonor_id || activeDonor.id;
+
+    const table = $('#historyTable').DataTable();
+    table.clear().draw();
+
+    fetch(`/api/riwayat-donor?pendonor_id=${pendonorId}&start_date=${startDate}&end_date=${endDate}`)
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                const formattedData = res.data.map(item => ({
+                    waktu_pendaftaran: item.waktu_pendaftaran,
+                    no_formulir: item.no_formulir,
+                    ruangan_nama: item.ruangan_rekruitmen ? item.ruangan_rekruitmen.ruangan_nama : '-',
+                    status_donor: '', // Empty as requested
+                    status: item.status
+                }));
+                table.rows.add(formattedData).draw();
+            }
+        })
+        .catch(err => {
+            console.error('Error loading history:', err);
+        });
+}
+
+// Event listener for "Tampilkan" button
+document.addEventListener('DOMContentLoaded', function() {
+    const btnTampilkan = document.getElementById('btnTampilkanRiwayat');
+    if (btnTampilkan) {
+        btnTampilkan.addEventListener('click', function() {
+            loadHistoryData();
+        });
+    }
+});
 
 function showProfileView() {
     localStorage.removeItem('pendaftaran_donor_view');
@@ -1051,11 +1160,49 @@ function showProfileView() {
 
 // Daftar Donor Action
 document.getElementById('btnDaftarDonorProfile').addEventListener('click', function() {
+    if (!activeDonor) return;
+
+    // Check if Blood Type and Rhesus are filled
+    if (!activeDonor.gol_darah || !activeDonor.rhesus) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Data Tidak Lengkap',
+            text: 'Silakan isi data Golongan Darah dan Rhesus terlebih dahulu melalui menu Edit Profil.',
+            confirmButtonText: 'Siap',
+            customClass: {
+                confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 focus:outline-none'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+    
+    // Clear previous form data
+    const formPendaftaran = document.getElementById('formPendaftaranDonor');
+    formPendaftaran.reset();
+    
+    // Reset Select2 locations
+    $('#pendaftaran_lokasi').val(null).trigger('change');
+    
+    // Reset Radio buttons (Questionnaire) manually just in case
+    formPendaftaran.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+
     localStorage.setItem('pendaftaran_donor_isPendaftaran', 'true');
     document.getElementById('mainContentCard').classList.add('hidden');
     document.getElementById('pendaftaranContainer').classList.remove('hidden');
     
+    // Set pendonor_id in the form
+    const pendonorId = activeDonor.pendonor_id || activeDonor.id;
+    document.getElementById('pendaftaran_pendonor_id').value = pendonorId;
     
+    // Pre-fill height and weight if available
+    const heightInput = document.querySelector('input[name="tinggibadan_cm"]');
+    const weightInput = document.querySelector('input[name="beratbadan_kg"]');
+    if (heightInput) heightInput.value = activeDonor.tinggibadan_cm || activeDonor.tinggibadan || '';
+    if (weightInput) weightInput.value = activeDonor.beratbadan_kg || activeDonor.beratbadan || '';
+
     // Initialize Select2 if not already done
     $('.select2-location').select2({
         placeholder: "Pilih Lokasi",
@@ -1063,8 +1210,11 @@ document.getElementById('btnDaftarDonorProfile').addEventListener('click', funct
         width: '100%'
     });
 
-    // Initialize Flatpickr for Pendaftaran Date
-    if (!document.getElementById('pendaftaran_tgl')._flatpickr) {
+    // Initialize or Reset Flatpickr for Pendaftaran Date
+    const tglInput = document.getElementById('pendaftaran_tgl');
+    if (tglInput._flatpickr) {
+        tglInput._flatpickr.setDate(new Date());
+    } else {
         flatpickr("#pendaftaran_tgl", {
             dateFormat: "d-m-Y",
             defaultDate: new Date(),
@@ -1086,18 +1236,110 @@ document.getElementById('btnBackToProfile').addEventListener('click', function()
 document.getElementById('formPendaftaranDonor').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // For now, just show a success message as requested "fungsi daftar donor nanti dulu"
+    // Validate that all questionnaire questions are answered
+    const totalQuestions = document.querySelectorAll('#formPendaftaranDonor table tbody tr').length;
+    const answeredQuestions = new Set();
+    document.querySelectorAll('#formPendaftaranDonor input[type="radio"]:checked').forEach(radio => {
+        answeredQuestions.add(radio.name);
+    });
+
+    if (answeredQuestions.size < totalQuestions) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Kuesioner Belum Lengkap',
+            text: 'Harap jawab semua pertanyaan kuesioner sebelum mendaftar.'
+        });
+        return;
+    }
+
+    // Basic validation for other fields
+    const tgl = document.getElementById('pendaftaran_tgl').value;
+    const tinggi = document.querySelector('input[name="tinggibadan_cm"]').value;
+    const berat = document.querySelector('input[name="beratbadan_kg"]').value;
+    const lokasi = document.getElementById('pendaftaran_lokasi').value;
+
+    if (!tgl || !tinggi || !berat || !lokasi) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Data Belum Lengkap',
+            text: 'Harap isi Tanggal, Tinggi Badan, Berat Badan, dan Lokasi Donor.'
+        });
+        return;
+    }
+
+    const formData = new FormData(this);
+    const payload = {
+        pendonor_id: formData.get('pendonor_id'),
+        tgl_pendaftaran: formData.get('tgl_pendaftaran'),
+        tinggibadan_cm: formData.get('tinggibadan_cm'),
+        beratbadan_kg: formData.get('beratbadan_kg'),
+        ruangan_id: formData.get('ruangan_id'),
+        jawaban: {}
+    };
+
+    // Correctly map radio buttons for "jawaban[id]"
+    formData.forEach((value, key) => {
+        if (key.startsWith('jawaban[')) {
+            const id = key.match(/\[(\d+)\]/)[1];
+            payload.jawaban[id] = value;
+        }
+    });
+
     Swal.fire({
-        icon: 'success',
-        title: 'Pendaftaran Berhasil',
-        text: 'Data pendaftaran donor Anda telah disimpan. Silakan lanjutkan proses di lokasi donor.',
-        confirmButtonText: 'Selesai',
-        customClass: {
-            confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 focus:outline-none'
+        title: 'Memproses Pendaftaran...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch('/daftar-donor', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        buttonsStyling: false
-    }).then(() => {
-        localStorage.removeItem('pendaftaran_donor_isPendaftaran');
-        document.getElementById('btnBackToProfile').click();
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Pendaftaran Berhasil',
+                text: res.message || 'Data pendaftaran donor Anda telah disimpan. Silakan lanjutkan proses di lokasi donor.',
+                confirmButtonText: 'Selesai',
+                customClass: {
+                    confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 focus:outline-none'
+                },
+                buttonsStyling: false
+            }).then(() => {
+                localStorage.removeItem('pendaftaran_donor_isPendaftaran');
+                document.getElementById('btnBackToProfile').click();
+                
+                // Refresh profile to update donation count if needed
+                if (activeDonor) {
+                    const donorId = activeDonor.pendonor_id || activeDonor.id;
+                    // Optionally fetch updated donor data or just increment locally
+                    activeDonor.donasi_ke = (activeDonor.donasi_ke || 0) + 1;
+                    showProfile(activeDonor);
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Pendaftaran Gagal',
+                text: res.message || 'Terjadi kesalahan saat menyimpan data pendaftaran.'
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan Server',
+            text: 'Gagal terhubung ke server. Silakan coba lagi nanti.'
+        });
     });
 });

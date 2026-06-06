@@ -22,9 +22,14 @@ class PendaftaranDonor extends Model
         'donasi_ke',
         'create_time',
         'update_time',
+        'create_ruangan',
         'ruangan_rekruitmen_id',
         'waktu_pendaftaran',
         'status',
+        'bataldonordarah',
+        'gol_darah',
+        'rhesus',
+        'dpjp_id',
         'beratbadan_kg',
         'tinggibadan_cm',
     ];
@@ -43,5 +48,10 @@ class PendaftaranDonor extends Model
     public function ruangan(): BelongsTo
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_id', 'ruangan_id');
+    }
+
+    public function ruanganRekruitmen(): BelongsTo
+    {
+        return $this->belongsTo(Ruangan::class, 'ruangan_rekruitmen_id', 'ruangan_id');
     }
 }

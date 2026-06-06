@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Pendonor extends Model
 {
     use HasFactory;
@@ -51,6 +53,11 @@ class Pendonor extends Model
     protected $casts = [
         'tgllahir' => 'date',
     ];
+
+    public function pendaftarans(): HasMany
+    {
+        return $this->hasMany(PendaftaranDonor::class, 'pendonor_id', 'pendonor_id');
+    }
 
     public function pegawai(): BelongsTo
     {

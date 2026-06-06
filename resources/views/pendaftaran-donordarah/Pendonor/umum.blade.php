@@ -69,8 +69,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1.5">
                     <label for="umum_tgllahir" class="block font-bold text-xs text-slate-700">Tanggal Lahir <span class="text-rose-500 font-extrabold">*</span></label>
-                    <input id="umum_tgllahir" type="date" name="tgllahir" required
-                        class="block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150" />
+                    <div class="relative group">
+                        <input id="umum_tgllahir" type="text" name="tgllahir" required
+                            class="block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition duration-150 placeholder-slate-400"
+                            placeholder="dd/mm/yyyy" />
+                        <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-rose-500 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
                 <div class="space-y-1.5">
                     <label class="block font-bold text-xs text-slate-700">Jenis Kelamin <span class="text-rose-500 font-extrabold">*</span></label>

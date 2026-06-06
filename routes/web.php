@@ -11,7 +11,9 @@ use App\Models\Pekerjaan;
 
 Route::get('/', function () {
     $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
-    $pendonors = Pendonor::all();
+    $pendonors = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
+        $query->where('status', 'Diterima');
+    }])->get();
     $provinsis = \App\Models\Provinsi::all();
     $ruangans = Ruangan::all();
     $kuesioners = KuesionerDonor::where('kuesioner_aktif', true)->orderBy('kuesioner_urutan', 'asc')->get();
@@ -20,10 +22,12 @@ Route::get('/', function () {
 });
 
 Route::post('/pendonor', [\App\Http\Controllers\PendonorController::class, 'store'])->name('pendonor.store');
+Route::post('/daftar-donor', [\App\Http\Controllers\PendonorController::class, 'daftarDonor'])->name('daftardonor.store');
 Route::put('/pendonor/{id}', [\App\Http\Controllers\PendonorController::class, 'update'])->name('pendonor.update');
 Route::get('/api/kabupaten/{provinsi_id}', [\App\Http\Controllers\PendonorController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{kabupaten_id}', [\App\Http\Controllers\PendonorController::class, 'getKecamatan']);
 Route::get('/api/kelurahan/{kecamatan_id}', [\App\Http\Controllers\PendonorController::class, 'getKelurahan']);
+Route::get('/api/riwayat-donor', [\App\Http\Controllers\PendonorController::class, 'getRiwayatDonor']);
 Route::post('/api/verify-pegawai', [\App\Http\Controllers\PendonorController::class, 'verifyPegawai']);
 
 Route::get('/dashboard', function () {

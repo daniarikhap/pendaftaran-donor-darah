@@ -11,8 +11,123 @@ use App\Models\Kelurahan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use App\Models\PendaftaranDonor;
+use App\Models\JawabanKuesioner;
+use App\Models\KuesionerDonor;
+
 class PendonorController extends Controller
 {
+    /**
+     * Store a new donor registration.
+     */
+    public function daftarDonor(Request $request)
+    {
+        $validated = $request->validate([
+            'pendonor_id' => 'required|exists:pendonor,pendonor_id',
+            'tgl_pendaftaran' => 'required|string',
+            'tinggibadan_cm' => 'required|numeric',
+            'beratbadan_kg' => 'required|numeric',
+            'ruangan_id' => 'required|exists:master_ruangan,ruangan_id',
+            'jawaban' => 'required|array',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pendonor = Pendonor::findOrFail($validated['pendonor_id']);
+
+            // 1. Generate no_formulir: PDH + Ymd + 00001
+            $today = date('Ymd');
+            $prefix = 'PDH' . $today;
+            $latest = PendaftaranDonor::where('no_formulir', 'like', $prefix . '%')
+                ->orderBy('no_formulir', 'desc')
+                ->first();
+            
+            if ($latest) {
+                $lastSeq = substr($latest->no_formulir, strlen($prefix));
+                $sequence = intval($lastSeq) + 1;
+            } else {
+                $sequence = 1;
+            }
+            $no_formulir = $prefix . str_pad($sequence, 5, '0', STR_PAD_LEFT);
+
+            // 2. Calculate donasi_ke
+            $previousDonationsCount = PendaftaranDonor::where('pendonor_id', $pendonor->pendonor_id)->count();
+            $donasi_ke = $previousDonationsCount + 1;
+
+            // 3. Determine status based on questionnaire
+            // Rule: Questions 1-3 (gambar 1) = YA (1), the rest = TIDAK (0)
+            $isSeleksi = true;
+            $kuesioners = KuesionerDonor::whereIn('kuesionerdonor_id', array_keys($validated['jawaban']))
+                ->orderBy('kuesioner_urutan', 'asc')
+                ->get();
+
+            foreach ($kuesioners as $k) {
+                $jawaban = $validated['jawaban'][$k->kuesionerdonor_id];
+                $urutan = $k->kuesioner_urutan;
+
+                if ($urutan <= 3) {
+                    if ($jawaban != 1) {
+                        $isSeleksi = false;
+                        break;
+                    }
+                } else {
+                    if ($jawaban != 0) {
+                        $isSeleksi = false;
+                        break;
+                    }
+                }
+            }
+            $status = $isSeleksi ? 'Proses' : 'Ditolak';
+
+            // 4. Parse pendaftaran date
+            $waktu_pendaftaran = date('Y-m-d H:i:s', strtotime($validated['tgl_pendaftaran']));
+
+            // 5. Create PendaftaranDonor
+            $pendaftaran = new PendaftaranDonor();
+            $pendaftaran->pendonor_id = $pendonor->pendonor_id;
+            $pendaftaran->no_formulir = $no_formulir;
+            $pendaftaran->nama_petugas = 'Online'; // Hardcoded as requested
+            $pendaftaran->donasi_ke = $donasi_ke;
+            $pendaftaran->create_ruangan = $validated['ruangan_id'];
+            $pendaftaran->ruangan_rekruitmen_id = $validated['ruangan_id'];
+            $pendaftaran->ruangan_id = $validated['ruangan_id'];
+            $pendaftaran->status = $status;
+            $pendaftaran->gol_darah = $pendonor->gol_darah;
+            $pendaftaran->rhesus = $pendonor->rhesus;
+            $pendaftaran->beratbadan_kg = $validated['beratbadan_kg'];
+            $pendaftaran->tinggibadan_cm = $validated['tinggibadan_cm'];
+            $pendaftaran->waktu_pendaftaran = $waktu_pendaftaran;
+            $pendaftaran->create_time = now();
+            $pendaftaran->save();
+
+            // 6. Save Questionnaire Answers
+            foreach ($validated['jawaban'] as $kuesioner_id => $ceklist) {
+                $jawabanModel = new JawabanKuesioner();
+                $jawabanModel->daftardonor_id = $pendaftaran->daftardonor_id;
+                $jawabanModel->kuesionerdonor_id = $kuesioner_id;
+                $jawabanModel->ceklist = $ceklist;
+                $jawabanModel->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pendaftaran Donor Berhasil!',
+                'data' => $pendaftaran
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error in daftarDonor: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal melakukan pendaftaran: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Store a newly created pendonor in storage.
      */
@@ -231,5 +346,31 @@ class PendonorController extends Controller
     {
         $kelurahan = Kelurahan::where('kecamatan_id', $kecamatan_id)->get(['id', 'nama']);
         return response()->json($kelurahan);
+    }
+
+    /**
+     * Get donor history.
+     */
+    public function getRiwayatDonor(Request $request)
+    {
+        $validated = $request->validate([
+            'pendonor_id' => 'required|exists:pendonor,pendonor_id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        $start = date('Y-m-d 00:00:00', strtotime($validated['start_date']));
+        $end = date('Y-m-d 23:59:59', strtotime($validated['end_date']));
+
+        $riwayat = PendaftaranDonor::with('ruanganRekruitmen')
+            ->where('pendonor_id', $validated['pendonor_id'])
+            ->whereBetween('waktu_pendaftaran', [$start, $end])
+            ->orderBy('waktu_pendaftaran', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $riwayat
+        ]);
     }
 }

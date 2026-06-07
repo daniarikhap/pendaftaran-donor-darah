@@ -163,12 +163,12 @@ document.addEventListener('DOMContentLoaded', function() {
     flatpickr("#umum_tgllahir", birthdayConfig);
 
     // Initialize Select2 on requested fields
-    $('#lama_jenis_identitas, #umum_jenisidentitas, #umum_provinsi, #umum_kabupaten, #umum_kecamatan, #umum_kelurahan, #umum_pekerjaan_id, #umum_agama, #umum_status_perkawinan, #umum_gol_darah').select2({
+    $('.select2-pegawai, #lama_jenis_identitas, #umum_jenisidentitas, #umum_provinsi, #umum_kabupaten, #umum_kecamatan, #umum_kelurahan, #umum_pekerjaan_id, #umum_agama, #umum_status_perkawinan, #umum_gol_darah').select2({
         width: '100%'
     });
 
     // Ensure changes to Select2 elements trigger native event handlers for validation/cascading
-    $('#lama_jenis_identitas, #umum_jenisidentitas, #umum_provinsi, #umum_kabupaten, #umum_kecamatan, #umum_kelurahan, #umum_pekerjaan_id, #umum_agama, #umum_status_perkawinan, #umum_gol_darah').on('change', function (e) {
+    $('.select2-pegawai, #lama_jenis_identitas, #umum_jenisidentitas, #umum_provinsi, #umum_kabupaten, #umum_kecamatan, #umum_kelurahan, #umum_pekerjaan_id, #umum_agama, #umum_status_perkawinan, #umum_gol_darah').on('change', function (e) {
         if (e.originalEvent) return; // Prevent infinite loop from native event propagation
         const event = new Event('change', { bubbles: true });
         this.dispatchEvent(event);
@@ -396,6 +396,7 @@ function resetForm(formId) {
     if (formId === 'formPegawai') {
         document.getElementById('pegawaiAutoFields').classList.add('opacity-50', 'pointer-events-none');
         document.getElementById('pegawaiManualFields').classList.add('hidden');
+        $('.select2-pegawai').val('').trigger('change').prop('disabled', false);
         const submitBtn = document.getElementById('btnSubmitPegawai');
         submitBtn.disabled = true;
         submitBtn.className = "bg-rose-300 text-white font-bold py-2.5 px-8 rounded-xl shadow opacity-50 cursor-not-allowed transition duration-150 focus:outline-none text-sm";
@@ -513,19 +514,109 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('pegawai_nik').value = data.nik;
                     document.getElementById('pegawai_tempat_lahir').value = data.tempat_lahir;
                     document.getElementById('pegawai_tgllahir').value = data.tgllahir;
-                    document.getElementById('pegawai_jenis_kelamin').value = data.jenis_kelamin;
 
-                    // Autofill hidden inputs
-                    document.getElementById('pegawai_pegawai_id').value = data.pegawai_id;
-                    document.getElementById('pegawai_pekerjaan_id').value = data.pekerjaan_id;
-                    document.getElementById('pegawai_agama').value = data.agama;
-                    document.getElementById('pegawai_statusperkawinan').value = data.statusperkawinan;
-                    document.getElementById('pegawai_gol_darah').value = data.gol_darah;
-                    document.getElementById('pegawai_rhesus').value = data.rhesus;
-                    document.getElementById('pegawai_propinsi_id').value = data.provinsi_id;
-                    document.getElementById('pegawai_kabupaten_id').value = data.kabupaten_id;
-                    document.getElementById('pegawai_kecamatan_id').value = data.kecamatan_id;
-                    document.getElementById('pegawai_kelurahan_id').value = data.kelurahan_id;
+                    // Helper to toggle between dynamic input and readonly display
+                    const toggleField = (id, value, isRadio = false) => {
+                        try {
+                            const input = document.getElementById(id);
+                            const container = document.getElementById(id + '_container');
+                            
+                            if (value && value !== '-' && value !== '') {
+                                // Data exists, disable field but keep visible
+                                if (isRadio && container) {
+                                    container.classList.add('pointer-events-none', 'opacity-70');
+                                } else if (input) {
+                                    input.disabled = true;
+                                    input.classList.add('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                                    if ($(input).hasClass('select2-hidden-accessible')) {
+                                        $(input).val(value).trigger('change');
+                                    } else {
+                                        input.value = value;
+                                    }
+                                }
+                            } else {
+                                // Data empty, show dynamic input
+                                if (isRadio && container) {
+                                    container.classList.remove('pointer-events-none', 'opacity-70');
+                                } else if (input) {
+                                    input.disabled = false;
+                                    input.classList.remove('bg-slate-100', 'text-slate-500', 'cursor-not-allowed');
+                                    if ($(input).hasClass('select2-hidden-accessible')) {
+                                        $(input).val('').trigger('change');
+                                    } else {
+                                        input.value = '';
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.warn(`Error toggling field ${id}:`, e);
+                        }
+                    };
+
+                    // Toggle fields based on data availability
+                    toggleField('pegawai_view_jk', data.jenis_kelamin, true);
+                    toggleField('pegawai_view_agama', data.agama);
+                    toggleField('pegawai_view_statusperkawinan', data.statusperkawinan);
+                    toggleField('pegawai_view_gol_darah', data.gol_darah);
+                    toggleField('pegawai_view_rhesus', data.rhesus, true);
+
+                    // If radio data exists, check the radio button
+                    if (data.jenis_kelamin) {
+                        const radio = document.querySelector(`input[name="jenis_kelamin_pegawai"][value="${data.jenis_kelamin}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                    if (data.rhesus) {
+                        const radio = document.querySelector(`input[name="rhesus_pegawai"][value="${data.rhesus}"]`);
+                        if (radio) radio.checked = true;
+                    }
+
+                    // Helper to safely set value
+                    const setSafeValue = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = val || '';
+                    };
+
+                    // Autofill hidden inputs (always update hidden inputs for form submission)
+                    setSafeValue('pegawai_pegawai_id', data.pegawai_id);
+                    setSafeValue('pegawai_pekerjaan_id', data.pekerjaan_id);
+                    setSafeValue('pegawai_agama', data.agama);
+                    setSafeValue('pegawai_statusperkawinan', data.statusperkawinan);
+                    setSafeValue('pegawai_gol_darah', data.gol_darah);
+                    setSafeValue('pegawai_rhesus', data.rhesus);
+                    setSafeValue('pegawai_jenis_kelamin', data.jenis_kelamin);
+                    setSafeValue('pegawai_propinsi_id', data.provinsi_id);
+
+                    // Event listeners for dynamic fields to update hidden inputs when user changes them manually
+                    if (!data.jenis_kelamin) {
+                        document.querySelectorAll('input[name="jenis_kelamin_pegawai"]').forEach(radio => {
+                            radio.addEventListener('change', (e) => {
+                                setSafeValue('pegawai_jenis_kelamin', e.target.value);
+                            });
+                        });
+                    }
+                    if (!data.agama) {
+                        const el = document.getElementById('pegawai_view_agama');
+                        if (el) el.addEventListener('change', (e) => setSafeValue('pegawai_agama', e.target.value));
+                    }
+                    if (!data.statusperkawinan) {
+                        const el = document.getElementById('pegawai_view_statusperkawinan');
+                        if (el) el.addEventListener('change', (e) => setSafeValue('pegawai_statusperkawinan', e.target.value));
+                    }
+                    if (!data.gol_darah) {
+                        const el = document.getElementById('pegawai_view_gol_darah');
+                        if (el) el.addEventListener('change', (e) => setSafeValue('pegawai_gol_darah', e.target.value));
+                    }
+                    if (!data.rhesus) {
+                        document.querySelectorAll('input[name="rhesus_pegawai"]').forEach(radio => {
+                            radio.addEventListener('change', (e) => {
+                                setSafeValue('pegawai_rhesus', e.target.value);
+                            });
+                        });
+                    }
+
+                    setSafeValue('pegawai_kabupaten_id', data.kabupaten_id);
+                    setSafeValue('pegawai_kecamatan_id', data.kecamatan_id);
+                    setSafeValue('pegawai_kelurahan_id', data.kelurahan_id);
 
                     // Autofill height & weight if available in employee record, otherwise let user input
                     const tinggiInput = document.getElementById('peg_tinggi_badan');

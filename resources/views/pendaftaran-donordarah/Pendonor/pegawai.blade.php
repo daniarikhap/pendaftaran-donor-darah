@@ -26,6 +26,7 @@
             <input type="hidden" id="pegawai_statusperkawinan" name="statusperkawinan" />
             <input type="hidden" id="pegawai_gol_darah" name="gol_darah" />
             <input type="hidden" id="pegawai_rhesus" name="rhesus" />
+            <input type="hidden" id="pegawai_jenis_kelamin" name="jenis_kelamin" />
             <input type="hidden" id="pegawai_propinsi_id" name="propinsi_id" />
             <input type="hidden" id="pegawai_kabupaten_id" name="kabupaten_id" />
             <input type="hidden" id="pegawai_kecamatan_id" name="kecamatan_id" />
@@ -69,13 +70,67 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1.5">
                     <label class="block font-bold text-xs text-slate-700">Jenis Kelamin</label>
-                    <input id="pegawai_jenis_kelamin" type="text" name="jenis_kelamin" readonly
-                        class="block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm focus:outline-none text-slate-500 cursor-not-allowed" />
+                    <div id="pegawai_view_jk_container" class="flex gap-4 py-2">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="jenis_kelamin_pegawai" value="Laki-laki" class="w-4 h-4 text-rose-600 border-slate-300 focus:ring-rose-500">
+                            <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Laki-laki</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="jenis_kelamin_pegawai" value="Perempuan" class="w-4 h-4 text-rose-600 border-slate-300 focus:ring-rose-500">
+                            <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Perempuan</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-bold text-xs text-slate-700">Agama</label>
+                    <select id="pegawai_view_agama" class="select2-pegawai block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all">
+                        <option value="">-- Pilih Agama --</option>
+                        @foreach(['ISLAM', 'KRISTEN', 'KATOLIK', 'HINDU', 'BUDHA', 'KONGHUCU'] as $agama)
+                            <option value="{{ $agama }}">{{ $agama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-bold text-xs text-slate-700">Status Perkawinan</label>
+                    <select id="pegawai_view_statusperkawinan" class="select2-pegawai block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all">
+                        <option value="">-- Pilih Status --</option>
+                        @foreach(['KAWIN', 'BELUM KAWIN', 'CERAI HIDUP', 'CERAI MATI'] as $status)
+                            <option value="{{ $status }}">{{ $status }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="space-y-1.5">
                     <label class="block font-bold text-xs text-slate-700">Pekerjaan</label>
                     <input id="pegawai_pekerjaan" type="text" value="Pegawai Rumah Sakit" readonly
                         class="block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm focus:outline-none text-slate-500 cursor-not-allowed" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                    <label class="block font-bold text-xs text-slate-700">Golongan Darah</label>
+                    <select id="pegawai_view_gol_darah" class="select2-pegawai block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all">
+                        <option value="">-- Pilih Golongan Darah --</option>
+                        @foreach(['A', 'B', 'O', 'AB'] as $gd)
+                            <option value="{{ $gd }}">{{ $gd }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block font-bold text-xs text-slate-700">Rhesus</label>
+                    <div id="pegawai_view_rhesus_container" class="flex gap-4 py-2">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="rhesus_pegawai" value="Positif" class="w-4 h-4 text-rose-600 border-slate-300 focus:ring-rose-500">
+                            <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Positif</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="rhesus_pegawai" value="Negatif" class="w-4 h-4 text-rose-600 border-slate-300 focus:ring-rose-500">
+                            <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Negatif</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>

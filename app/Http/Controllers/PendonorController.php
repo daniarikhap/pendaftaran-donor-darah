@@ -256,10 +256,18 @@ class PendonorController extends Controller
         }
 
         $user = \App\Models\User::where('pegawai_id', $pegawai->pegawai_id)->first();
-        if (!$user || !\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
+        
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Password salah.'
+                'message' => 'Akun pengguna untuk pegawai ini belum dibuat.'
+            ], 404);
+        }
+
+        if (!\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password) && $validated['password'] !== $user->password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password yang Anda masukkan salah.'
             ], 401);
         }
 

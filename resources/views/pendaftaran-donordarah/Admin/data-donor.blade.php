@@ -157,48 +157,60 @@
                                         {{ $donor->ruanganRekruitmen->ruangan_nama ?? '-' }}
                                     </td>
                                     <td class="px-4 py-5 align-top text-center">
-                                        <span
-                                            class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border 
-                                            {{ $donor->status === 'Diterima'
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                                : ($donor->status === 'Ditolak'
-                                                    ? 'bg-slate-100 text-slate-800 border-slate-200'
-                                                    : 'bg-amber-50 text-amber-600 border-amber-100') }}">
-                                            {{ $donor->status }}
-                                        </span>
-                                    </td>
+                                         <span
+                                             class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border 
+                                             {{ $donor->bataldonordarah 
+                                                 ? 'bg-rose-100 text-rose-600 border-rose-200' 
+                                                 : ($donor->status === 'Proses'
+                                                     ? 'bg-slate-100 text-slate-900 border-slate-200'
+                                                     : 'bg-amber-50 text-amber-600 border-amber-100') }}">
+                                             {{ $donor->bataldonordarah ? 'DIBATALKAN' : ($donor->status === 'Proses' ? 'ANTRIAN' : 'SELEKSI') }}
+                                         </span>
+                                     </td>
                                     <td class="px-4 py-5 align-top text-center">
-                                        @if ($donor->status === 'Proses')
-                                            <a href="{{ route('admin.seleksi-donor', $donor->daftardonor_id) }}"
-                                                class="p-2 bg-rose-50 text-rose-600 rounded-lg border border-rose-100 hover:bg-rose-100 transition-colors shadow-sm flex items-center justify-center mx-auto"
-                                                title="Seleksi Donor">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M12 2.1c-2.8 4.3-5.2 8.7-5.2 12.1 0 2.9 2.3 5.3 5.2 5.3s5.2-2.4 5.2-5.3c0-3.4-2.4-7.8-5.2-12.1z" />
+                                         @if ($donor->bataldonordarah)
+                                             <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border bg-rose-50 text-rose-600 border-rose-100 uppercase">
+                                                 Dibatalkan
+                                             </span>
+                                         @elseif ($donor->status === 'Proses')
+                                             <a href="{{ route('admin.seleksi-donor', $donor->daftardonor_id) }}"
+                                                 class="inline-flex p-2 bg-rose-50 text-rose-600 rounded-full border border-rose-100 hover:bg-rose-100 transition-colors shadow-sm items-center justify-center mx-auto"
+                                                 title="Seleksi Donor">
+                                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                     <path
+                                                         d="M12 2.1c-2.8 4.3-5.2 8.7-5.2 12.1 0 2.9 2.3 5.3 5.2 5.3s5.2-2.4 5.2-5.3c0-3.4-2.4-7.8-5.2-12.1z" />
+                                                 </svg>
+                                             </a>
+                                         @else
+                                             <span
+                                                 class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border 
+                                                 {{ $donor->status === 'Diterima'
+                                                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                     : 'bg-rose-50 text-rose-600 border-rose-100' }}">
+                                                 {{ strtoupper($donor->status) }}
+                                             </span>
+                                         @endif
+                                     </td>
+                                    <td class="px-4 py-5 align-top text-center">
+                                        @if ($donor->bataldonordarah)
+                                            <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border bg-rose-50 text-rose-600 border-rose-100 uppercase">
+                                                Dibatalkan
+                                            </span>
+                                        @elseif ($donor->status === 'Proses')
+                                            <button type="button" 
+                                                onclick="confirmBatalDonor('{{ $donor->daftardonor_id }}', '{{ $donor->pendonor->nama_lengkap }}')"
+                                                class="p-2 text-rose-400 hover:text-rose-600 transition-colors"
+                                                title="Batal Donor">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
-                                            </a>
+                                            </button>
                                         @else
-                                            <span class="text-slate-300">-</span>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase">-</span>
                                         @endif
-                                    </td>
-                                    <td class="px-4 py-5 align-top text-center">
-                                        <button class="p-2 text-rose-400 hover:text-rose-600 transition-colors"
-                                            title="Batal Donor">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="14"
-                                        class="px-6 py-12 text-center text-slate-500 font-medium bg-slate-50/20">
-                                        Tidak ada data donor ditemukan.
-                                    </td>
-                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -211,18 +223,88 @@
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
         <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script>
+            function confirmBatalDonor(id, nama) {
+                Swal.fire({
+                    title: 'Batal Donor?',
+                    text: `Apakah Anda yakin membatalkan data donor untuk "${nama}"?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Batalkan!',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
+                        cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Memproses...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        fetch(`/admin/batal-donor/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(res => {
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: res.message,
+                                    confirmButtonColor: '#e11d48'
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message,
+                                    confirmButtonColor: '#e11d48'
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Kesalahan',
+                                text: 'Terjadi kesalahan sistem.',
+                                confirmButtonColor: '#e11d48'
+                            });
+                        });
+                    }
+                });
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 // Initialize Flatpickr
+                const now = new Date();
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
                 flatpickr("#tgl_pendaftaran", {
                     mode: "range",
                     dateFormat: "Y-m-d",
                     altInput: true,
                     altFormat: "d/m/Y",
                     allowInput: true,
+                    defaultDate: [firstDay, lastDay],
                     locale: {
                         rangeSeparator: ' ~ '
                     }
@@ -237,6 +319,7 @@
                     "scrollX": true,
                     "language": {
                         "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/id.json",
+                        "emptyTable": "Tidak ada data donor ditemukan.",
                         "paginate": {
                             "previous": "<svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 19l-7-7 7-7'></path></svg>",
                             "next": "<svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5l7 7-7 7'></path></svg>"

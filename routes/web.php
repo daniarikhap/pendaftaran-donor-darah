@@ -13,6 +13,11 @@ Route::get('/', function () {
     $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
     $pendonors = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
         $query->where('status', 'Diterima');
+    }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
+        $query->where('status', 'Diterima');
+    }], 'waktu_pendaftaran')
+    ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+        $query->where('status', 'Proses')->where('bataldonordarah', false);
     }])->get();
     $provinsis = \App\Models\Provinsi::all();
     $ruangans = Ruangan::all();
@@ -56,6 +61,8 @@ Route::middleware('auth')->group(function () {
     // Data Donor (Admin)
     Route::get('/admin/data-donor', [\App\Http\Controllers\PendonorController::class, 'indexAdmin'])->name('admin.data-donor');
     Route::get('/admin/seleksi-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'seleksiDonor'])->name('admin.seleksi-donor');
+    Route::post('/admin/seleksi-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'storeSeleksi'])->name('admin.seleksi-donor.store');
+    Route::post('/admin/batal-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'batalDonor'])->name('admin.batal-donor');
 });
 
 require __DIR__.'/auth.php';

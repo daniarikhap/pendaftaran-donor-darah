@@ -171,6 +171,7 @@ return new class extends Migration
             $table->increments('kuesionerdonor_id');
             $table->integer('kuesioner_urutan');
             $table->string('kuesioner_desc');
+            $table->boolean('jawaban_lolos');
             $table->boolean('kuesioner_aktif');
             $table->timestamp('create_time')->nullable();
             $table->timestamp('update_time')->nullable();
@@ -183,15 +184,43 @@ return new class extends Migration
         Schema::create('seleksidonor', function (Blueprint $table) {
             $table->increments('seleksidonor_id');
             $table->unsignedInteger('daftardonor_id');
-            $table->unsignedInteger('pegawai_id');
+            $table->unsignedInteger('pegawai_id')->nullable();
             $table->unsignedInteger('pendonor_id');
             $table->timestamp('tglseleksidonor');
             $table->string('jenisdonor');
-            $table->string('tekanandarah');
             $table->string('td_systolic');
-            $table->string('td_diastoliic'); // spelled exactly as in prompt
+            $table->string('td_diastoliic');
+            $table->string('kadar_hb');
+            $table->string('suhu_tubuh');
             $table->string('detaknadi');
-            $table->boolean('is_gagalseleksi');
+            $table->string('gol_darah');
+            $table->string('rhesus');
+            $table->boolean('alasan_ditolak')->nullable();
+            $table->boolean('bb_rendah')->nullable();
+            $table->boolean('usia_kurang')->nullable();
+            $table->boolean('hb_rendah')->nullable();
+            $table->boolean('medis_lain')->nullable();
+            $table->boolean('medis_tk_tinggi')->nullable();
+            $table->boolean('medis_td_rendah')->nullable();
+            $table->boolean('minum_obat')->nullable();  
+            $table->boolean('medis_pasca_op')->nullable();      
+            $table->boolean('medis_hb_17')->nullable();
+            $table->boolean('medis_vaksin')->nullable();
+            $table->boolean('medis_bb_lebih')->nullable();
+            $table->boolean('perilakuberesiko')->nullable();
+            $table->boolean('perilakuberesiko_homo')->nullable();   
+            $table->boolean('perilakuberesiko_tatto')->nullable();
+            $table->boolean('perilakuberesiko_freesx')->nullable();
+            $table->boolean('perilakuberesiko_penasun')->nullable();
+            $table->boolean('perilakuberesiko_napi')->nullable();
+            $table->boolean('riwberpergian')->nullable();
+            $table->boolean('riwbepergian_endemik')->nullable();
+            $table->boolean('riwbepergian_hiv')->nullable();
+            $table->boolean('riwbepergian_sapigila')->nullable();
+            $table->boolean('lain_lain')->nullable();
+            $table->boolean('lain_lain_tdkkembali')->nullable();        
+            $table->boolean('lain_lain_donortua')->nullable();
+            $table->text('catatan_dokter')->nullable();
             $table->timestamps();
 
             $table->foreign('daftardonor_id')->references('daftardonor_id')->on('daftardonor')->onDelete('cascade');

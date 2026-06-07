@@ -54,10 +54,12 @@ class KuesionerController extends Controller
         $request->validate([
             'kuesioner_desc' => 'required|string|max:255',
             'kuesioner_urutan' => 'required|integer|min:1',
+            'jawaban_lolos' => 'required|boolean',
         ], [
             'kuesioner_desc.required' => 'Deskripsi kuesioner wajib diisi.',
             'kuesioner_urutan.required' => 'Urutan kuesioner wajib diisi.',
             'kuesioner_urutan.integer' => 'Urutan kuesioner harus berupa angka.',
+            'jawaban_lolos.required' => 'Jawaban lolos wajib diisi.',
         ]);
 
         // Mengambil ID ruangan pertama yang aktif atau default ke 1
@@ -66,6 +68,7 @@ class KuesionerController extends Controller
         KuesionerDonor::create([
             'kuesioner_desc' => $request->kuesioner_desc,
             'kuesioner_urutan' => $request->kuesioner_urutan,
+            'jawaban_lolos' => $request->jawaban_lolos,
             'kuesioner_aktif' => true, // Default aktif saat pertama kali dibuat
             'create_time' => now(),
             'create_loginpemakai_id' => Auth::id() ?? 1,
@@ -94,10 +97,12 @@ class KuesionerController extends Controller
             'kuesioner_desc' => 'required|string|max:255',
             'kuesioner_urutan' => 'required|integer|min:1',
             'kuesioner_aktif' => 'nullable|boolean',
+            'jawaban_lolos' => 'required|boolean',
         ], [
             'kuesioner_desc.required' => 'Deskripsi kuesioner wajib diisi.',
             'kuesioner_urutan.required' => 'Urutan kuesioner wajib diisi.',
             'kuesioner_urutan.integer' => 'Urutan kuesioner harus berupa angka.',
+            'jawaban_lolos.required' => 'Jawaban lolos wajib diisi.',
         ]);
 
         $kuesioner = KuesionerDonor::findOrFail($id);
@@ -106,6 +111,7 @@ class KuesionerController extends Controller
             'kuesioner_desc' => $request->kuesioner_desc,
             'kuesioner_urutan' => $request->kuesioner_urutan,
             'kuesioner_aktif' => $request->has('kuesioner_aktif'),
+            'jawaban_lolos' => $request->jawaban_lolos,
             'update_time' => now(),
             'update_loginpemakai_id' => Auth::id() ?? 1,
         ]);

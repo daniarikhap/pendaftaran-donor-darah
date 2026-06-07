@@ -182,7 +182,19 @@ function restoreState() {
     const savedDonor = localStorage.getItem('pendaftaran_donor_activeDonor');
     if (savedDonor) {
         try {
-            const donor = JSON.parse(savedDonor);
+            let donor = JSON.parse(savedDonor);
+            
+            // CRITICAL: Refresh donor data from fresh existingDonors (from database) on page reload
+            if (typeof existingDonors !== 'undefined' && existingDonors.length > 0) {
+                const donorId = donor.pendonor_id || donor.id;
+                const freshDonor = existingDonors.find(d => (d.pendonor_id || d.id) === donorId);
+                if (freshDonor) {
+                    donor = freshDonor;
+                    // Update localStorage with fresh data for future use
+                    localStorage.setItem('pendaftaran_donor_activeDonor', JSON.stringify(donor));
+                }
+            }
+
             showProfile(donor);
             
             // Check if we were in history view
@@ -852,10 +864,14 @@ function showProfile(donor) {
     
     document.getElementById('metricDonorTerakhir').textContent = formatDateIndo(donor.tgl_donor_terakhir);
 
-    // Next donor date: add 60 days
-    let refDate = donor.tgl_donor_terakhir ? new Date(donor.tgl_donor_terakhir) : new Date(donor.created_at || new Date());
-    let nextDate = new Date(refDate.getTime() + 60 * 24 * 60 * 60 * 1000);
-    document.getElementById('metricDonorKembali').textContent = formatDateIndo(nextDate);
+    // Next donor date: add 56 days
+    if (donor.tgl_donor_terakhir) {
+        let refDate = new Date(donor.tgl_donor_terakhir);
+        let nextDate = new Date(refDate.getTime() + 56 * 24 * 60 * 60 * 1000);
+        document.getElementById('metricDonorKembali').textContent = formatDateIndo(nextDate);
+    } else {
+        document.getElementById('metricDonorKembali').textContent = '-';
+    }
 }
 
 // Exit button
@@ -1077,8 +1093,15 @@ function showHistoryView() {
 
                 // Status Badge Styling
                 const status = data.status;
+                const isBatal = data.bataldonordarah === 1 || data.bataldonordarah === true;
+                
                 let badgeClass = '';
-                if (status === 'Proses') {
+                let statusText = status;
+
+                if (isBatal) {
+                    badgeClass = 'bg-rose-100 text-rose-600 border-rose-200';
+                    statusText = 'Dibatalkan';
+                } else if (status === 'Proses') {
                     badgeClass = 'bg-blue-100 text-blue-600 border-blue-200';
                 } else if (status === 'Ditolak') {
                     badgeClass = 'bg-rose-100 text-rose-600 border-rose-200';
@@ -1087,18 +1110,34 @@ function showHistoryView() {
                 }
 
                 if (badgeClass) {
-                    $('td:eq(5)', row).html(`<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${badgeClass}">${status}</span>`);
+                    $('td:eq(5)', row).html(`<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${badgeClass}">${statusText}</span>`);
                 }
+
+                // Status Donor Styling
+                const statusDonor = isBatal ? 'Dibatalkan' : data.status_donor;
+                if (isBatal) {
+                    $('td:eq(4)', row).html(`<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-rose-50 text-rose-600 border-rose-100">${statusDonor}</span>`);
+                } else if (statusDonor === 'ANTRIAN') {
+                    $('td:eq(4)', row).html(`<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-slate-100 text-slate-900 border-slate-200">${statusDonor}</span>`);
+                } else if (statusDonor === 'SELEKSI') {
+                    $('td:eq(4)', row).html(`<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-amber-50 text-amber-600 border-amber-100">${statusDonor}</span>`);
+                }
+                $('td:eq(4)', row).addClass('text-center');
+
             }
         });
     }
 
     // Initialize Flatpickr if not already done
     if (!document.getElementById('dateRangePicker')._flatpickr) {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
         flatpickr("#dateRangePicker", {
             mode: "range",
             dateFormat: "d-m-Y",
-            defaultDate: [new Date(new Date().setDate(new Date().getDate() - 5)), new Date()],
+            defaultDate: [firstDay, lastDay],
             locale: {
                 rangeSeparator: " ~ "
             }
@@ -1136,8 +1175,9 @@ function loadHistoryData() {
                     waktu_pendaftaran: item.waktu_pendaftaran,
                     no_formulir: item.no_formulir,
                     ruangan_nama: item.ruangan_rekruitmen ? item.ruangan_rekruitmen.ruangan_nama : '-',
-                    status_donor: '', // Empty as requested
-                    status: item.status
+                    status_donor: item.status === 'Proses' ? 'ANTRIAN' : 'SELEKSI',
+                    status: item.status,
+                    bataldonordarah: item.bataldonordarah
                 }));
                 table.rows.add(formattedData).draw();
             }
@@ -1167,7 +1207,47 @@ function showProfileView() {
 document.getElementById('btnDaftarDonorProfile').addEventListener('click', function() {
     if (!activeDonor) return;
 
-    // Check if Blood Type and Rhesus are filled
+    // 0. Check for existing active registration (status 'Proses' and not cancelled)
+    if (activeDonor.has_active_registration) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Pendaftaran Aktif',
+            text: 'Anda sudah pernah daftar donor, tunggu data Anda diproses terlebih dahulu.',
+            confirmButtonText: 'Mengerti',
+            customClass: {
+                confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 focus:outline-none'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    // 1. Check for 56-day gap if they have donated before
+    if (activeDonor.tgl_donor_terakhir) {
+        const lastDonorDate = new Date(activeDonor.tgl_donor_terakhir);
+        const today = new Date();
+        
+        // Calculate difference in days
+        const diffTime = today - lastDonorDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 56) {
+            const nextDate = new Date(lastDonorDate.getTime() + 56 * 24 * 60 * 60 * 1000);
+            Swal.fire({
+                icon: 'error',
+                title: 'Belum Bisa Donor',
+                text: `Maaf, Anda baru bisa melakukan donor kembali pada tanggal ${formatDateIndo(nextDate)} (jeda 56 hari).`,
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    confirmButton: 'bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-6 rounded-xl transition duration-150 focus:outline-none'
+                },
+                buttonsStyling: false
+            });
+            return;
+        }
+    }
+
+    // 2. Check if Blood Type and Rhesus are filled
     if (!activeDonor.gol_darah || !activeDonor.rhesus) {
         Swal.fire({
             icon: 'warning',
@@ -1323,11 +1403,10 @@ document.getElementById('formPendaftaranDonor').addEventListener('submit', funct
                 localStorage.removeItem('pendaftaran_donor_isPendaftaran');
                 document.getElementById('btnBackToProfile').click();
                 
-                // Refresh profile to update donation count if needed
-                if (activeDonor) {
-                    const donorId = activeDonor.pendonor_id || activeDonor.id;
-                    // Optionally fetch updated donor data or just increment locally
-                    activeDonor.donasi_ke = (activeDonor.donasi_ke || 0) + 1;
+                // Refresh profile with fresh data from server
+                if (res.pendonor) {
+                    activeDonor = res.pendonor;
+                    localStorage.setItem('pendaftaran_donor_activeDonor', JSON.stringify(activeDonor));
                     showProfile(activeDonor);
                 }
             });

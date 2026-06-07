@@ -484,90 +484,112 @@ class DatabaseSeeder extends Seeder
             [
                 'kuesioner_urutan' => 1,
                 'kuesioner_desc' => 'Apakah saat ini anda merasa sehat?',
+                'jawaban_lolos' => true,
             ],
             [
                 'kuesioner_urutan' => 2,
                 'kuesioner_desc' => 'Apakah anda cukup tidur?',
+                'jawaban_lolos' => true,
             ],
             [
                 'kuesioner_urutan' => 3,
                 'kuesioner_desc' => 'Apakah anda makan dalam 30-60 menit terakhir?',
+                'jawaban_lolos' => true,
             ],
             [
                 'kuesioner_urutan' => 4,
                 'kuesioner_desc' => 'Apakah anda diare dalam 7 hari terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 5,
                 'kuesioner_desc' => 'Apakah anda mengalami penurunan berat badan tanpa sebab yang jelas dalam 3 bulan terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 6,
                 'kuesioner_desc' => 'Apakah anda minum aspirin atau obat nyeri lain dalam 3 hari terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 7,
                 'kuesioner_desc' => 'Apakah saat ini anda sedang minum antibiotik?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 8,
                 'kuesioner_desc' => 'Apakah dalam 7 hari terakhir anda minum antiniotik?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 9,
                 'kuesioner_desc' => 'Apakah anda penderita asma, epilepsi, penyakit kulit, batuk lama, TBC, alergi, tekanan darah tinggi, kencing manis, penyakit jantung, penyakit ginjal, kelainan tiroid, kanker atau kelainan darah?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 10,
                 'kuesioner_desc' => 'Apakah anda atau seorang dalam keluarga anda pernah menderita hepatitis?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 11,
                 'kuesioner_desc' => 'Apakah anda melakukan pengobatan gigi dalam 3 (tiga) hari terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 12,
                 'kuesioner_desc' => 'Apakah anda atau pasangan anda berisiko atau sedang dalam pengobatan penyakit menular seksual, termasuk di dalamnya berisiko terhadap HIV?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 13,
                 'kuesioner_desc' => 'Apakah anda dioperasi besar dalam 6 (enam) bulan terakhir atau kecil dalam 1 (satu) bulan terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 14,
                 'kuesioner_desc' => 'Apakah anda pernah tindik / tato / akupuntur dalam 12 bulan terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 15,
                 'kuesioner_desc' => 'Apakah anda mempunyai riwayat sebagai pengguna obat-obatan atau pernah dipenjara dalam 3 (tiga) tahun terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 16,
                 'kuesioner_desc' => 'Apakah anda pernah ditransfusi darah dalam 1 (satu) tahun terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 17,
                 'kuesioner_desc' => 'Apakah anda mendapat vaksinasi / imunisasi dalam 1 (satu) tahun terakhir?',
-            ],
+                'jawaban_lolos' => false,
+            ],  
             [
                 'kuesioner_urutan' => 18,
                 'kuesioner_desc' => 'Apakah anda mengunjungi daerah malaria dalam 1 (satu) tahun terakhir atau pernah menderita malaria dalam 3 (tiga) tahun terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 19,
                 'kuesioner_desc' => 'Apakah anda mengalami masalah saat donasi terakhir?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 20,
                 'kuesioner_desc' => 'Apakah anda sedang menstruasi sekarang?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 21,
                 'kuesioner_desc' => 'Apakah anda sehabis melahirkan 6 (enam) bulan dari sekarang?',
+                'jawaban_lolos' => false,
             ],
             [
                 'kuesioner_urutan' => 22,
                 'kuesioner_desc' => 'Apakah anda menyusui bayi kurang dari 6 bulan (asi eksklusif)?',
+                'jawaban_lolos' => false,
             ],
         ];
 

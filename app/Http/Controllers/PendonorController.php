@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Pendonor;
+use App\Models\SeleksiDonor;
 use App\Models\Provinsi;
 use App\Models\Kabupaten;
 use App\Models\Kecamatan;
@@ -56,26 +58,18 @@ class PendonorController extends Controller
             $donasi_ke = $previousDonationsCount + 1;
 
             // 3. Determine status based on questionnaire
-            // Rule: Questions 1-3 (gambar 1) = YA (1), the rest = TIDAK (0)
+            // Rule: Compare donor's answer with jawaban_lolos in kuesionerdonor table
             $isSeleksi = true;
             $kuesioners = KuesionerDonor::whereIn('kuesionerdonor_id', array_keys($validated['jawaban']))
-                ->orderBy('kuesioner_urutan', 'asc')
                 ->get();
 
             foreach ($kuesioners as $k) {
-                $jawaban = $validated['jawaban'][$k->kuesionerdonor_id];
-                $urutan = $k->kuesioner_urutan;
-
-                if ($urutan <= 3) {
-                    if ($jawaban != 1) {
-                        $isSeleksi = false;
-                        break;
-                    }
-                } else {
-                    if ($jawaban != 0) {
-                        $isSeleksi = false;
-                        break;
-                    }
+                $jawabanDonor = $validated['jawaban'][$k->kuesionerdonor_id];
+                
+                // Compare with jawaban_lolos (match both as integer/boolean)
+                if ((int)$jawabanDonor !== (int)$k->jawaban_lolos) {
+                    $isSeleksi = false;
+                    break;
                 }
             }
             $status = $isSeleksi ? 'Proses' : 'Ditolak';
@@ -112,10 +106,21 @@ class PendonorController extends Controller
 
             DB::commit();
 
+            // Fetch fresh pendonor data with aggregates to update frontend state
+            $pendonorFresh = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
+                $query->where('status', 'Diterima');
+            }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
+                $query->where('status', 'Diterima');
+            }], 'waktu_pendaftaran')
+            ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+                $query->where('status', 'Proses')->where('bataldonordarah', false);
+            }])->findOrFail($pendonor->pendonor_id);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pendaftaran Donor Berhasil!',
-                'data' => $pendaftaran
+                'data' => $pendaftaran,
+                'pendonor' => $pendonorFresh
             ]);
 
         } catch (\Exception $e) {
@@ -215,6 +220,16 @@ class PendonorController extends Controller
         $pendonor->pegawai_id = $validated['pegawai_id'] ?? null;
         $pendonor->save();
 
+        // Refresh to get counts and max date
+        $pendonor = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
+            $query->where('status', 'Diterima');
+        }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
+            $query->where('status', 'Diterima');
+        }], 'waktu_pendaftaran')
+        ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+            $query->where('status', 'Proses')->where('bataldonordarah', false);
+        }])->findOrFail($pendonor->pendonor_id);
+
         return response()->json([
             'success' => true,
             'message' => 'Registrasi Berhasil!',
@@ -307,6 +322,16 @@ class PendonorController extends Controller
             $pendonor->gol_darah = $request->input('gol_darah') ?: null;
             $pendonor->rhesus = $request->input('rhesus') ?: null;
             $pendonor->save();
+
+            // Refresh to get counts and max date
+            $pendonor = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
+                $query->where('status', 'Diterima');
+            }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
+                $query->where('status', 'Diterima');
+            }], 'waktu_pendaftaran')
+            ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+                $query->where('status', 'Proses')->where('bataldonordarah', false);
+            }])->findOrFail($pendonor->pendonor_id);
 
             return response()->json([
                 'success' => true,
@@ -424,6 +449,13 @@ class PendonorController extends Controller
     {
         $donor = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen'])->findOrFail($id);
         
+        // Get last successful donor history
+        $riwayatTerakhir = PendaftaranDonor::where('pendonor_id', $donor->pendonor_id)
+            ->where('status', 'Diterima')
+            ->where('daftardonor_id', '!=', $id)
+            ->orderBy('waktu_pendaftaran', 'desc')
+            ->first();
+
         // Get questionnaire answers
         $jawabanKuesioner = JawabanKuesioner::with('kuesionerdonor')
             ->where('daftardonor_id', $id)
@@ -432,6 +464,122 @@ class PendonorController extends Controller
                 return $jawaban->kuesionerdonor->kuesioner_urutan;
             });
 
-        return view('pendaftaran-donordarah.Admin.seleksi-donor', compact('donor', 'jawabanKuesioner'));
+        return view('pendaftaran-donordarah.Admin.seleksi-donor', compact('donor', 'jawabanKuesioner', 'riwayatTerakhir'));
+    }
+
+    /**
+     * Store the seleksi donor data.
+     */
+    public function storeSeleksi(Request $request, $id)
+    {
+        $donor = PendaftaranDonor::findOrFail($id);
+
+        $request->validate([
+            'jenis_donor' => 'required',
+            'tensi_sistole' => 'required',
+            'tensi_diastole' => 'required',
+            'kadar_hb' => 'required',
+            'suhu_tubuh' => 'required',
+            'denyut_nadi' => 'required',
+            'gol_darah' => 'required',
+            'rhesus' => 'required',
+            'tgl_seleksi' => 'required|date',
+        ]);
+
+        $isDitolak = $request->has('is_ditolak');
+
+        if ($isDitolak) {
+            $alasan = $request->input('alasan', []);
+            $hasAlasan = !empty($alasan) || 
+                         $request->has('alasan_medis_active') || 
+                         $request->has('alasan_resiko_active') || 
+                         $request->has('alasan_bepergian_active') || 
+                         $request->has('alasan_lain_active');
+
+            if (!$hasAlasan) {
+                return back()->withInput()->withErrors(['is_ditolak' => 'silahkan isi terlebih dahulu alasan ditolak atau gagal']);
+            }
+        }
+
+        $alasanArray = $request->input('alasan', []);
+
+        SeleksiDonor::create([
+            'daftardonor_id' => $donor->daftardonor_id,
+            'pendonor_id' => $donor->pendonor_id,
+            'pegawai_id' => Auth::id(), // Assuming logged in user is the officer
+            'tglseleksidonor' => $request->tgl_seleksi,
+            'jenisdonor' => $request->jenis_donor,
+            'td_systolic' => $request->tensi_sistole,
+            'td_diastoliic' => $request->tensi_diastole,
+            'kadar_hb' => $request->kadar_hb,
+            'suhu_tubuh' => $request->suhu_tubuh,
+            'detaknadi' => $request->denyut_nadi,
+            'gol_darah' => $request->gol_darah,
+            'rhesus' => $request->rhesus,
+            'alasan_ditolak' => $isDitolak,
+            'bb_rendah' => in_array('BB < 45Kg', $alasanArray),
+            'usia_kurang' => in_array('Usia < 17 Tahun', $alasanArray),
+            'hb_rendah' => in_array('HB <', $alasanArray),
+            'medis_lain' => $request->has('alasan_medis_active'),
+            'medis_tk_tinggi' => $request->alasan_medis == 'Hipertensi',
+            'medis_td_rendah' => $request->alasan_medis == 'Hipotensi',
+            'minum_obat' => $request->alasan_medis == 'Minum Obat',
+            'medis_pasca_op' => $request->alasan_medis == 'Pasca Op',
+            'medis_hb_17' => $request->alasan_medis == 'HB > 17,0 gr %',
+            'medis_vaksin' => $request->alasan_medis == 'Sakit / vaksin / haid / busui',
+            'medis_bb_lebih' => $request->alasan_medis == 'BB >=',
+            'perilakuberesiko' => $request->has('alasan_resiko_active'),
+            'perilakuberesiko_homo' => $request->alasan_resiko == 'Homo',
+            'perilakuberesiko_tatto' => $request->alasan_resiko == 'Tato',
+            'perilakuberesiko_freesx' => $request->alasan_resiko == 'Free Sex',
+            'perilakuberesiko_penasun' => $request->alasan_resiko == 'Penasun',
+            'perilakuberesiko_napi' => $request->alasan_resiko == 'Napi',
+            'riwberpergian' => $request->has('alasan_bepergian_active'),
+            'riwbepergian_endemik' => $request->alasan_bepergian == 'Daerah Endemik',
+            'riwbepergian_hiv' => $request->alasan_bepergian == 'Negara dg Kasus HIV',
+            'riwbepergian_sapigila' => $request->alasan_bepergian == 'Negara dg Kasus Sapi Gila',
+            'lain_lain' => $request->has('alasan_lain_active'),
+            'lain_lain_tdkkembali' => $request->alasan_lain == 'Tidak Kembali',
+            'lain_lain_donortua' => $request->alasan_lain == 'Donor Pertama Usia > 65Th',
+            'catatan_dokter' => $request->catatan_dokter,
+        ]);
+
+        // Update status in daftardonor table
+        $donor->status = $isDitolak ? 'Ditolak' : 'Diterima';
+        $donor->save();
+
+        return redirect()->route('admin.data-donor')->with('success', 'Seleksi donor berhasil disimpan.');
+    }
+
+    /**
+     * Cancel the donor registration.
+     */
+    public function batalDonor($id)
+    {
+        try {
+            $donor = PendaftaranDonor::findOrFail($id);
+
+            // Only allow cancellation if status is still 'Proses' (Antrian)
+            if ($donor->status !== 'Proses') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya data dengan status Antrian yang dapat dibatalkan.'
+                ], 422);
+            }
+
+            $donor->bataldonordarah = true;
+            $donor->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data donor berhasil dibatalkan.',
+                'data' => $donor
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membatalkan data donor.'
+            ], 500);
+        }
     }
 }

@@ -65,8 +65,8 @@
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-100">
                                 <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-16 text-center">No</th>
-                                <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-20 text-center">Urutan</th>
                                 <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pertanyaan</th>
+                                <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-32 text-center">Jawaban</th>
                                 <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-32 text-center">Status</th>
                                 <th class="py-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-40 text-center">Aksi</th>
                             </tr>
@@ -78,11 +78,19 @@
                                     <td class="py-4 px-4 text-sm text-slate-600 text-center">
                                         {{ $no++ }}
                                     </td>
-                                    <td class="py-4 px-4 text-sm text-slate-600 font-medium text-center">
-                                        {{ $kuesioner->kuesioner_urutan }}
-                                    </td>
                                     <td class="py-4 px-4 text-sm text-slate-800">
                                         {{ $kuesioner->kuesioner_desc }}
+                                    </td>
+                                    <td class="py-4 px-4 text-center">
+                                        @if ($kuesioner->jawaban_lolos)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                                Ya
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
+                                                Tidak
+                                            </span>
+                                        @endif
                                     </td>
                                     <td class="py-4 px-4 text-center">
                                         @if ($kuesioner->kuesioner_aktif)
@@ -98,7 +106,7 @@
                                     <td class="py-4 px-4 text-center">
                                         <div class="flex items-center justify-center space-x-2">
                                             <!-- Detail Button -->
-                                            <button onclick="showDetail('{{ addslashes($kuesioner->kuesioner_desc) }}', '{{ $kuesioner->kuesioner_urutan }}', '{{ $kuesioner->kuesioner_aktif ? 'Aktif' : 'Tidak Aktif' }}')" 
+                                            <button onclick="showDetail('{{ addslashes($kuesioner->kuesioner_desc) }}', '{{ $kuesioner->kuesioner_aktif ? 'Aktif' : 'Tidak Aktif' }}', '{{ $kuesioner->jawaban_lolos ? 'Ya' : 'Tidak' }}')" 
                                                     class="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition duration-150" 
                                                     title="Detail">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +195,7 @@
             // Form pencarian default sudah memfilter lewat Laravel Controller.
         });
 
-        function showDetail(desc, urutan, status) {
+        function showDetail(desc, status, jawaban) {
             Swal.fire({
                 title: 'Detail Kuesioner',
                 html: `
@@ -197,8 +205,8 @@
                             <span class="text-slate-800 font-medium">${desc}</span>
                         </div>
                         <div>
-                            <span class="font-semibold text-slate-500 block">Urutan Tampilan:</span>
-                            <span class="text-slate-800 font-medium">${urutan}</span>
+                            <span class="font-semibold text-slate-500 block">Jawaban Kuesioner:</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${jawaban === 'Ya' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}">${jawaban}</span>
                         </div>
                         <div>
                             <span class="font-semibold text-slate-500 block">Status Keaktifan:</span>

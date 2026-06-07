@@ -16,6 +16,7 @@ class KuesionerDonor extends Model
         'kuesioner_urutan',
         'kuesioner_desc',
         'kuesioner_aktif',
+        'jawaban_lolos',
         'create_time',
         'update_time',
         'create_loginpemakai_id',
@@ -25,6 +26,7 @@ class KuesionerDonor extends Model
 
     protected $casts = [
         'kuesioner_aktif' => 'boolean',
+        'jawaban_lolos' => 'boolean',
         'create_time' => 'datetime',
         'update_time' => 'datetime',
     ];

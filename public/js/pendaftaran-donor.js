@@ -792,12 +792,7 @@ document.getElementById('formUmum').addEventListener('submit', function(e) {
         },
         body: JSON.stringify(payload)
     })
-    .then(res => {
-        if (!res.ok) {
-            return res.text().then(text => { throw new Error(text) });
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(res => {
         if (res.success) {
             // Add newly registered donor to existingDonors array

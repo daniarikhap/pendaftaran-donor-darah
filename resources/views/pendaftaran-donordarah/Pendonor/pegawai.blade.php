@@ -85,7 +85,7 @@
                     <label class="block font-bold text-xs text-slate-700">Agama</label>
                     <select id="pegawai_view_agama" class="select2-pegawai block w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all">
                         <option value="">-- Pilih Agama --</option>
-                        @foreach(['ISLAM', 'KRISTEN', 'KATOLIK', 'HINDU', 'BUDHA', 'KONGHUCU'] as $agama)
+                        @foreach(['ISLAM', 'KRISTEN', 'PROTESTAN', 'KATOLIK', 'HINDU', 'BUDHA', 'KONGHUCU'] as $agama)
                             <option value="{{ $agama }}">{{ $agama }}</option>
                         @endforeach
                     </select>

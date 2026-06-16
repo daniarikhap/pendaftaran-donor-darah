@@ -44,7 +44,7 @@ class PendonorController extends Controller
             $latest = PendaftaranDonor::where('no_formulir', 'like', $prefix . '%')
                 ->orderBy('no_formulir', 'desc')
                 ->first();
-            
+
             if ($latest) {
                 $lastSeq = substr($latest->no_formulir, strlen($prefix));
                 $sequence = intval($lastSeq) + 1;
@@ -65,7 +65,7 @@ class PendonorController extends Controller
 
             foreach ($kuesioners as $k) {
                 $jawabanDonor = $validated['jawaban'][$k->kuesionerdonor_id];
-                
+
                 // Compare with jawaban_lolos (match both as integer/boolean)
                 if ((int)$jawabanDonor !== (int)$k->jawaban_lolos) {
                     $isSeleksi = false;
@@ -112,9 +112,9 @@ class PendonorController extends Controller
             }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
                 $query->where('status', 'Diterima');
             }], 'waktu_pendaftaran')
-            ->withExists(['pendaftarans as has_active_registration' => function ($query) {
-                $query->where('status', 'Proses')->where('bataldonordarah', false);
-            }])->findOrFail($pendonor->pendonor_id);
+                ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+                    $query->where('status', 'Proses')->where('bataldonordarah', false);
+                }])->findOrFail($pendonor->pendonor_id);
 
             return response()->json([
                 'success' => true,
@@ -122,7 +122,6 @@ class PendonorController extends Controller
                 'data' => $pendaftaran,
                 'pendonor' => $pendonorFresh
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error in daftarDonor: ' . $e->getMessage());
@@ -138,6 +137,16 @@ class PendonorController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->filled('no_identitas')) {
+            $exists = Pendonor::where('no_identitas', $request->input('no_identitas'))->exists();
+            if ($exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda Tidak Bisa Mendaftar, Karena Sudah Pernah Melakukan Daftar Sebelumnya.'
+                ], 422);
+            }
+        }
+
         $rules = [
             'jenisidentitas' => 'required|string',
             'no_identitas' => 'required|string',
@@ -226,9 +235,9 @@ class PendonorController extends Controller
         }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
             $query->where('status', 'Diterima');
         }], 'waktu_pendaftaran')
-        ->withExists(['pendaftarans as has_active_registration' => function ($query) {
-            $query->where('status', 'Proses')->where('bataldonordarah', false);
-        }])->findOrFail($pendonor->pendonor_id);
+            ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+                $query->where('status', 'Proses')->where('bataldonordarah', false);
+            }])->findOrFail($pendonor->pendonor_id);
 
         return response()->json([
             'success' => true,
@@ -256,7 +265,7 @@ class PendonorController extends Controller
         }
 
         $user = \App\Models\User::where('pegawai_id', $pegawai->pegawai_id)->first();
-        
+
         if (!$user) {
             return response()->json([
                 'success' => false,
@@ -321,8 +330,8 @@ class PendonorController extends Controller
         try {
             // Find by primary key (pendonor_id) or by no_pendonor
             $pendonor = Pendonor::where('pendonor_id', $id)
-                                ->orWhere('no_pendonor', $id)
-                                ->firstOrFail();
+                ->orWhere('no_pendonor', $id)
+                ->firstOrFail();
 
             $pendonor->nama_lengkap = $validated['nama_lengkap'];
             $pendonor->alamat_lengkap = $validated['alamat_lengkap'];
@@ -337,9 +346,9 @@ class PendonorController extends Controller
             }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
                 $query->where('status', 'Diterima');
             }], 'waktu_pendaftaran')
-            ->withExists(['pendaftarans as has_active_registration' => function ($query) {
-                $query->where('status', 'Proses')->where('bataldonordarah', false);
-            }])->findOrFail($pendonor->pendonor_id);
+                ->withExists(['pendaftarans as has_active_registration' => function ($query) {
+                    $query->where('status', 'Proses')->where('bataldonordarah', false);
+                }])->findOrFail($pendonor->pendonor_id);
 
             return response()->json([
                 'success' => true,
@@ -418,7 +427,7 @@ class PendonorController extends Controller
             // Handle range separator ' ~ ' (custom) or ' to ' (default flatpickr)
             $dateString = $request->tgl_pendaftaran;
             $dates = preg_split('/ (to|~) /', $dateString);
-            
+
             if (count($dates) === 2) {
                 $query->whereBetween('waktu_pendaftaran', [
                     trim($dates[0]) . ' 00:00:00',
@@ -456,7 +465,7 @@ class PendonorController extends Controller
     public function seleksiDonor($id)
     {
         $donor = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen'])->findOrFail($id);
-        
+
         // Get last successful donor history
         $riwayatTerakhir = PendaftaranDonor::where('pendonor_id', $donor->pendonor_id)
             ->where('status', 'Diterima')
@@ -468,7 +477,7 @@ class PendonorController extends Controller
         $jawabanKuesioner = JawabanKuesioner::with('kuesionerdonor')
             ->where('daftardonor_id', $id)
             ->get()
-            ->sortBy(function($jawaban) {
+            ->sortBy(function ($jawaban) {
                 return $jawaban->kuesionerdonor->kuesioner_urutan;
             });
 
@@ -498,11 +507,11 @@ class PendonorController extends Controller
 
         if ($isDitolak) {
             $alasan = $request->input('alasan', []);
-            $hasAlasan = !empty($alasan) || 
-                         $request->has('alasan_medis_active') || 
-                         $request->has('alasan_resiko_active') || 
-                         $request->has('alasan_bepergian_active') || 
-                         $request->has('alasan_lain_active');
+            $hasAlasan = !empty($alasan) ||
+                $request->has('alasan_medis_active') ||
+                $request->has('alasan_resiko_active') ||
+                $request->has('alasan_bepergian_active') ||
+                $request->has('alasan_lain_active');
 
             if (!$hasAlasan) {
                 return back()->withInput()->withErrors(['is_ditolak' => 'silahkan isi terlebih dahulu alasan ditolak atau gagal']);

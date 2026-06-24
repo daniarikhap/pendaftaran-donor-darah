@@ -52,10 +52,14 @@ class SeleksiDonor extends Model
         'lain_lain_tdkkembali',
         'lain_lain_donortua',
         'catatan_dokter',
+        'status_donor_kunjungan',
+        'tanggal_donor_berhasil',
+        'keterangan_donor',
     ];
 
     protected $casts = [
         'tglseleksidonor' => 'datetime',
+        'tanggal_donor_berhasil' => 'datetime',
         'alasan_ditolak' => 'boolean',
         'bb_rendah' => 'boolean',
         'usia_kurang' => 'boolean',

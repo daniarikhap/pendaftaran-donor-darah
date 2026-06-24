@@ -221,6 +221,9 @@ return new class extends Migration
             $table->boolean('lain_lain_tdkkembali')->nullable();        
             $table->boolean('lain_lain_donortua')->nullable();
             $table->text('catatan_dokter')->nullable();
+            $table->text('keterangan_donor')->nullable();
+            $table->string('status_donor_kunjungan')->nullable();
+            $table->timestamp('tanggal_donor_berhasil')->nullable();
             $table->timestamps();
 
             $table->foreign('daftardonor_id')->references('daftardonor_id')->on('daftardonor')->onDelete('cascade');

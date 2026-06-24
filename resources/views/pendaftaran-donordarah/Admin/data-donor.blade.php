@@ -156,23 +156,45 @@
                                         class="px-4 py-5 align-top text-[12px] text-slate-600 whitespace-normal leading-relaxed">
                                         {{ $donor->ruanganRekruitmen->ruangan_nama ?? '-' }}
                                     </td>
-                                    <td class="px-4 py-5 align-top text-center">
-                                         <span
-                                             class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border 
-                                             {{ $donor->bataldonordarah 
-                                                 ? 'bg-rose-100 text-rose-600 border-rose-200' 
-                                                 : ($donor->status === 'Proses'
-                                                     ? 'bg-slate-100 text-slate-900 border-slate-200'
-                                                     : 'bg-amber-50 text-amber-600 border-amber-100') }}">
-                                             {{ $donor->bataldonordarah ? 'DIBATALKAN' : ($donor->status === 'Proses' ? 'ANTRIAN' : 'SELEKSI') }}
-                                         </span>
-                                     </td>
-                                    <td class="px-4 py-5 align-top text-center">
+                                     <td class="px-4 py-5 align-top text-center">
+                                          @php
+                                              $statusText = 'ANTRIAN';
+                                              $badgeClass = 'bg-slate-100 text-slate-900 border-slate-200';
+                                              
+                                              if ($donor->seleksiDonor) {
+                                                  $statusKunjungan = $donor->seleksiDonor->status_donor_kunjungan;
+                                                  if ($statusKunjungan === 'Siap Donor') {
+                                                      $statusText = 'SIAP DONOR';
+                                                      $badgeClass = 'bg-amber-50 text-amber-600 border-amber-100';
+                                                  } elseif ($statusKunjungan === 'Donor Berhasil') {
+                                                      $statusText = 'DONOR BERHASIL';
+                                                      $badgeClass = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                                                  } elseif ($statusKunjungan === 'Batal Donor') {
+                                                      $statusText = 'BATAL DONOR';
+                                                      $badgeClass = 'bg-rose-50 text-rose-600 border-rose-100';
+                                                  } elseif ($statusKunjungan === 'Ditolak') {
+                                                      $statusText = 'DITOLAK';
+                                                      $badgeClass = 'bg-rose-50 text-rose-600 border-rose-100';
+                                                  } else {
+                                                      $statusText = strtoupper($statusKunjungan);
+                                                      $badgeClass = 'bg-rose-50 text-rose-600 border-rose-100';
+                                                  }
+                                              } elseif ($donor->bataldonordarah) {
+                                                  $statusText = 'DIBATALKAN';
+                                                  $badgeClass = 'bg-rose-100 text-rose-600 border-rose-200';
+                                              }
+                                          @endphp
+                                          
+                                          <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border {{ $badgeClass }}">
+                                              {{ $statusText }}
+                                          </span>
+                                      </td>
+                                     <td class="px-4 py-5 align-top text-center">
                                          @if ($donor->bataldonordarah)
                                              <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border bg-rose-50 text-rose-600 border-rose-100 uppercase">
                                                  Dibatalkan
                                              </span>
-                                         @elseif ($donor->status === 'Proses')
+                                         @elseif ($donor->status === 'Proses' || $donor->status === 'Siap Donor')
                                              <a href="{{ route('admin.seleksi-donor', $donor->daftardonor_id) }}"
                                                  class="inline-flex p-2 bg-rose-50 text-rose-600 rounded-full border border-rose-100 hover:bg-rose-100 transition-colors shadow-sm items-center justify-center mx-auto"
                                                  title="Seleksi Donor">
@@ -191,24 +213,24 @@
                                              </span>
                                          @endif
                                      </td>
-                                    <td class="px-4 py-5 align-top text-center">
-                                        @if ($donor->bataldonordarah)
-                                            <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border bg-rose-50 text-rose-600 border-rose-100 uppercase">
-                                                Dibatalkan
-                                            </span>
-                                        @elseif ($donor->status === 'Proses')
-                                            <button type="button" 
-                                                onclick="confirmBatalDonor('{{ $donor->daftardonor_id }}', '{{ $donor->pendonor->nama_lengkap }}')"
-                                                class="p-2 text-rose-400 hover:text-rose-600 transition-colors"
-                                                title="Batal Donor">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        @else
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase">-</span>
-                                        @endif
-                                    </td>
+                                     <td class="px-4 py-5 align-top text-center">
+                                         @if ($donor->bataldonordarah)
+                                             <span class="inline-block px-3 py-1 text-[10px] font-bold rounded-full border bg-rose-50 text-rose-600 border-rose-100 uppercase">
+                                                 Dibatalkan
+                                             </span>
+                                         @elseif ($donor->status === 'Proses')
+                                             <button type="button" 
+                                                 onclick="confirmBatalDonor('{{ $donor->daftardonor_id }}', '{{ $donor->pendonor->nama_lengkap }}')"
+                                                 class="p-2 text-rose-400 hover:text-rose-600 transition-colors"
+                                                 title="Batal Donor">
+                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                 </svg>
+                                             </button>
+                                         @else
+                                             <span class="text-[10px] font-bold text-slate-400 uppercase">-</span>
+                                         @endif
+                                     </td>
                                 </tr>
                             @empty
                             @endforelse

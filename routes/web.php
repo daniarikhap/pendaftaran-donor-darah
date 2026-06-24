@@ -11,11 +11,11 @@ use App\Models\Pekerjaan;
 
 Route::get('/', function () {
     $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
-    $pendonors = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
-        $query->where('status', 'Diterima');
-    }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
-        $query->where('status', 'Diterima');
-    }], 'waktu_pendaftaran')
+    $pendonors = Pendonor::withCount(['seleksiDonors as total_donor_diterima' => function ($query) {
+        $query->where('status_donor_kunjungan', 'Donor Berhasil');
+    }])->withMax(['seleksiDonors as tgl_donor_terakhir' => function ($query) {
+        $query->where('status_donor_kunjungan', 'Donor Berhasil');
+    }], 'tanggal_donor_berhasil')
     ->withExists(['pendaftarans as has_active_registration' => function ($query) {
         $query->where('status', 'Proses')->where('bataldonordarah', false);
     }])->get();
@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/data-donor', [\App\Http\Controllers\PendonorController::class, 'indexAdmin'])->name('admin.data-donor');
     Route::get('/admin/seleksi-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'seleksiDonor'])->name('admin.seleksi-donor');
     Route::post('/admin/seleksi-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'storeSeleksi'])->name('admin.seleksi-donor.store');
+    Route::post('/admin/seleksi-donor/{id}/konfirmasi', [\App\Http\Controllers\PendonorController::class, 'konfirmasiDonor'])->name('admin.seleksi-donor.konfirmasi');
+    Route::post('/admin/seleksi-donor/{id}/batal', [\App\Http\Controllers\PendonorController::class, 'batalKunjunganDonor'])->name('admin.seleksi-donor.batal');
     Route::post('/admin/batal-donor/{id}', [\App\Http\Controllers\PendonorController::class, 'batalDonor'])->name('admin.batal-donor');
 });
 

@@ -59,6 +59,11 @@ class Pendonor extends Model
         return $this->hasMany(PendaftaranDonor::class, 'pendonor_id', 'pendonor_id');
     }
 
+    public function seleksiDonors(): HasMany
+    {
+        return $this->hasMany(SeleksiDonor::class, 'pendonor_id', 'pendonor_id');
+    }
+
     public function pegawai(): BelongsTo
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id', 'pegawai_id');

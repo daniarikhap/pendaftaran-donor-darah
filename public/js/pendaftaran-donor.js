@@ -1187,8 +1187,9 @@ function showHistoryView() {
                 if (isBatal) {
                     badgeClass = 'bg-rose-100 text-rose-600 border-rose-200';
                     statusText = 'Dibatalkan';
-                } else if (status === 'Proses') {
+                } else if (status === 'Proses' || status === 'Siap Donor') {
                     badgeClass = 'bg-blue-100 text-blue-600 border-blue-200';
+                    statusText = 'Proses';
                 } else if (status === 'Ditolak') {
                     badgeClass = 'bg-rose-100 text-rose-600 border-rose-200';
                 } else if (status === 'Diterima') {

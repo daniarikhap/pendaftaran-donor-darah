@@ -54,4 +54,9 @@ class PendaftaranDonor extends Model
     {
         return $this->belongsTo(Ruangan::class, 'ruangan_rekruitmen_id', 'ruangan_id');
     }
+
+    public function seleksiDonor()
+    {
+        return $this->hasOne(SeleksiDonor::class, 'daftardonor_id', 'daftardonor_id');
+    }
 }

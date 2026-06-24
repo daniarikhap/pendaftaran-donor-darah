@@ -107,11 +107,11 @@ class PendonorController extends Controller
             DB::commit();
 
             // Fetch fresh pendonor data with aggregates to update frontend state
-            $pendonorFresh = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
-                $query->where('status', 'Diterima');
-            }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
-                $query->where('status', 'Diterima');
-            }], 'waktu_pendaftaran')
+            $pendonorFresh = Pendonor::withCount(['seleksiDonors as total_donor_diterima' => function ($query) {
+                $query->where('status_donor_kunjungan', 'Donor Berhasil');
+            }])->withMax(['seleksiDonors as tgl_donor_terakhir' => function ($query) {
+                $query->where('status_donor_kunjungan', 'Donor Berhasil');
+            }], 'tanggal_donor_berhasil')
                 ->withExists(['pendaftarans as has_active_registration' => function ($query) {
                     $query->where('status', 'Proses')->where('bataldonordarah', false);
                 }])->findOrFail($pendonor->pendonor_id);
@@ -230,11 +230,11 @@ class PendonorController extends Controller
         $pendonor->save();
 
         // Refresh to get counts and max date
-        $pendonor = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
-            $query->where('status', 'Diterima');
-        }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
-            $query->where('status', 'Diterima');
-        }], 'waktu_pendaftaran')
+        $pendonor = Pendonor::withCount(['seleksiDonors as total_donor_diterima' => function ($query) {
+            $query->where('status_donor_kunjungan', 'Donor Berhasil');
+        }])->withMax(['seleksiDonors as tgl_donor_terakhir' => function ($query) {
+            $query->where('status_donor_kunjungan', 'Donor Berhasil');
+        }], 'tanggal_donor_berhasil')
             ->withExists(['pendaftarans as has_active_registration' => function ($query) {
                 $query->where('status', 'Proses')->where('bataldonordarah', false);
             }])->findOrFail($pendonor->pendonor_id);
@@ -341,11 +341,11 @@ class PendonorController extends Controller
             $pendonor->save();
 
             // Refresh to get counts and max date
-            $pendonor = Pendonor::withCount(['pendaftarans as total_donor_diterima' => function ($query) {
-                $query->where('status', 'Diterima');
-            }])->withMax(['pendaftarans as tgl_donor_terakhir' => function ($query) {
-                $query->where('status', 'Diterima');
-            }], 'waktu_pendaftaran')
+            $pendonor = Pendonor::withCount(['seleksiDonors as total_donor_diterima' => function ($query) {
+                $query->where('status_donor_kunjungan', 'Donor Berhasil');
+            }])->withMax(['seleksiDonors as tgl_donor_terakhir' => function ($query) {
+                $query->where('status_donor_kunjungan', 'Donor Berhasil');
+            }], 'tanggal_donor_berhasil')
                 ->withExists(['pendaftarans as has_active_registration' => function ($query) {
                     $query->where('status', 'Proses')->where('bataldonordarah', false);
                 }])->findOrFail($pendonor->pendonor_id);
@@ -421,7 +421,7 @@ class PendonorController extends Controller
      */
     public function indexAdmin(Request $request)
     {
-        $query = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen']);
+        $query = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen', 'seleksiDonor']);
 
         if ($request->filled('tgl_pendaftaran')) {
             // Handle range separator ' ~ ' (custom) or ' to ' (default flatpickr)
@@ -464,7 +464,7 @@ class PendonorController extends Controller
      */
     public function seleksiDonor($id)
     {
-        $donor = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen'])->findOrFail($id);
+        $donor = PendaftaranDonor::with(['pendonor', 'ruanganRekruitmen', 'seleksiDonor'])->findOrFail($id);
 
         // Get last successful donor history
         $riwayatTerakhir = PendaftaranDonor::where('pendonor_id', $donor->pendonor_id)
@@ -519,6 +519,7 @@ class PendonorController extends Controller
         }
 
         $alasanArray = $request->input('alasan', []);
+        $statusKunjungan = $isDitolak ? 'Ditolak' : 'Siap Donor';
 
         SeleksiDonor::create([
             'daftardonor_id' => $donor->daftardonor_id,
@@ -559,13 +560,59 @@ class PendonorController extends Controller
             'lain_lain_tdkkembali' => $request->alasan_lain == 'Tidak Kembali',
             'lain_lain_donortua' => $request->alasan_lain == 'Donor Pertama Usia > 65Th',
             'catatan_dokter' => $request->catatan_dokter,
+            'status_donor_kunjungan' => $statusKunjungan,
         ]);
 
         // Update status in daftardonor table
-        $donor->status = $isDitolak ? 'Ditolak' : 'Diterima';
+        $donor->status = $statusKunjungan;
         $donor->save();
 
+        if ($statusKunjungan === 'Siap Donor') {
+            return redirect()->route('admin.seleksi-donor', $id)->with('success', 'Seleksi donor berhasil disimpan.');
+        }
+
         return redirect()->route('admin.data-donor')->with('success', 'Seleksi donor berhasil disimpan.');
+    }
+
+    /**
+     * Confirm that the donor succeeded.
+     */
+    public function konfirmasiDonor($id)
+    {
+        $donor = PendaftaranDonor::findOrFail($id);
+        $seleksi = SeleksiDonor::where('daftardonor_id', $id)->firstOrFail();
+
+        $seleksi->status_donor_kunjungan = 'Donor Berhasil';
+        $seleksi->tanggal_donor_berhasil = now();
+        $seleksi->save();
+
+        $donor->status = 'Diterima';
+        $donor->save();
+
+        return redirect()->route('admin.data-donor')->with('success', 'Donor darah berhasil dikonfirmasi.');
+    }
+
+    /**
+     * Cancel the donor visit.
+     */
+    public function batalKunjunganDonor(Request $request, $id)
+    {
+        $request->validate([
+            'keterangan_donor' => 'required|string',
+        ]);
+
+        $donor = PendaftaranDonor::findOrFail($id);
+        $seleksi = SeleksiDonor::where('daftardonor_id', $id)->firstOrFail();
+
+        $seleksi->status_donor_kunjungan = 'Batal Donor';
+        $seleksi->keterangan_donor = $request->keterangan_donor;
+        $seleksi->save();
+
+        $donor->bataldonordarah = true;
+        $donor->status = 'Dibatalkan';
+        $donor->save();
+
+        return redirect()->route('admin.data-donor')->with('success', 'Donor darah berhasil dibatalkan.');
     }
 
     /**

@@ -8,6 +8,8 @@ use App\Models\Pendonor;
 use App\Models\KuesionerDonor;
 
 use App\Models\Pekerjaan;
+use App\Models\PendaftaranDonor;
+use App\Models\SeleksiDonor;
 
 Route::get('/', function () {
     $pekerjaans = Pekerjaan::where('pekerjaan_aktif', true)->get();
@@ -36,12 +38,12 @@ Route::get('/api/riwayat-donor', [\App\Http\Controllers\PendonorController::clas
 Route::post('/api/verify-pegawai', [\App\Http\Controllers\PendonorController::class, 'verifyPegawai']);
 
 Route::get('/dashboard', function () {
-    $jumlahPegawai = Pegawai::count();
-    $jumlahRuangan = Ruangan::count();
+    $totalDonor = PendaftaranDonor::count();
+    $donorBerhasil = SeleksiDonor::where('status_donor_kunjungan', 'Donor Berhasil')->count();
     $jumlahPendonor = Pendonor::count();
     $jumlahKuesioner = KuesionerDonor::count();
 
-    return view('pendaftaran-donordarah.Admin.dashboard', compact('jumlahPegawai', 'jumlahRuangan', 'jumlahPendonor', 'jumlahKuesioner'));
+    return view('pendaftaran-donordarah.Admin.dashboard', compact('totalDonor', 'donorBerhasil', 'jumlahPendonor', 'jumlahKuesioner'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

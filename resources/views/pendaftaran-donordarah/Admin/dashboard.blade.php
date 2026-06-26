@@ -9,37 +9,39 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Statistic Cards Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Card Pegawai -->
+                <!-- Card Total Donor -->
                 <div class="bg-white overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 sm:rounded-2xl border border-slate-100 p-6 flex items-center justify-between relative group">
                     <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-blue-50/40 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
                     <div>
-                        <p class="text-sm font-medium text-slate-500">Jumlah Pegawai</p>
-                        <h4 class="text-3xl font-extrabold text-slate-800 mt-1">{{ $jumlahPegawai }}</h4>
-                        <p class="text-xs text-slate-400 mt-1">Pegawai terdaftar</p>
+                        <p class="text-sm font-medium text-slate-500">Total Donor</p>
+                        <h4 class="text-3xl font-extrabold text-slate-800 mt-1">{{ $totalDonor }}</h4>
+                        <p class="text-xs text-slate-400 mt-1">Pendaftaran donor</p>
                     </div>
                     <div class="bg-blue-50 p-3.5 rounded-2xl text-blue-600 border border-blue-100 shadow-sm transition-colors duration-300 group-hover:bg-blue-100/80">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            <!-- User registration icon -->
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                     </div>
                 </div>
 
-                <!-- Card Ruangan -->
+                <!-- Card Donor Berhasil -->
                 <div class="bg-white overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 sm:rounded-2xl border border-slate-100 p-6 flex items-center justify-between relative group">
-                    <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-amber-50/40 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
+                    <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-emerald-50/40 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
                     <div>
-                        <p class="text-sm font-medium text-slate-500">Jumlah Ruangan</p>
-                        <h4 class="text-3xl font-extrabold text-slate-800 mt-1">{{ $jumlahRuangan }}</h4>
-                        <p class="text-xs text-slate-400 mt-1">Ruangan donor aktif</p>
+                        <p class="text-sm font-medium text-slate-500">Donor Berhasil</p>
+                        <h4 class="text-3xl font-extrabold text-slate-800 mt-1">{{ $donorBerhasil }}</h4>
+                        <p class="text-xs text-slate-400 mt-1">Donor berhasil</p>
                     </div>
-                    <div class="bg-amber-50 p-3.5 rounded-2xl text-amber-600 border border-amber-100 shadow-sm transition-colors duration-300 group-hover:bg-amber-100/80">
+                    <div class="bg-emerald-50 p-3.5 rounded-2xl text-emerald-600 border border-emerald-100 shadow-sm transition-colors duration-300 group-hover:bg-emerald-100/80">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            <!-- Shield Check / Done icon -->
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                 </div>
 
-                <!-- Card Pendonor -->
+                <!-- Card Jumlah Pendonor -->
                 <div class="bg-white overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 sm:rounded-2xl border border-slate-100 p-6 flex items-center justify-between relative group">
                     <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-rose-50/40 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
                     <div>
@@ -49,6 +51,7 @@
                     </div>
                     <div class="bg-rose-50 p-3.5 rounded-2xl text-rose-600 border border-rose-100 shadow-sm transition-colors duration-300 group-hover:bg-rose-100/80">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Heart representing donors/care -->
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                     </div>
@@ -56,14 +59,15 @@
 
                 <!-- Card Kuesioner -->
                 <div class="bg-white overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 sm:rounded-2xl border border-slate-100 p-6 flex items-center justify-between relative group">
-                    <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-emerald-50/40 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
+                    <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-amber-50/40 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
                     <div>
                         <p class="text-sm font-medium text-slate-500">Jumlah Kuesioner</p>
                         <h4 class="text-3xl font-extrabold text-slate-800 mt-1">{{ $jumlahKuesioner }}</h4>
                         <p class="text-xs text-slate-400 mt-1">Kuesioner aktif & non-aktif</p>
                     </div>
-                    <div class="bg-emerald-50 p-3.5 rounded-2xl text-emerald-600 border border-emerald-100 shadow-sm transition-colors duration-300 group-hover:bg-emerald-100/80">
+                    <div class="bg-amber-50 p-3.5 rounded-2xl text-amber-600 border border-amber-100 shadow-sm transition-colors duration-300 group-hover:bg-amber-100/80">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- Clipboard list for questionnaire -->
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                     </div>

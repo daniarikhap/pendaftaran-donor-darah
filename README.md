@@ -53,17 +53,18 @@ docker run --rm \
     -u "$(id -u):$(id -g)" \
     -v "$(pwd):/var/www/html" \
     -w /var/www/html \
-    laravelsail/php83-composer:latest \
+    laravelsail/php84-composer:latest \
     composer install --ignore-platform-reqs
 ```
 
 ### 4. Jalankan Laravel Sail (Docker Containers)
-Nyalakan semua service (Web server, MySQL, Redis, Meilisearch, dll) di latar belakang:
+Bangun image container terlebih dahulu lalu nyalakan semua service (Web server, MySQL, Redis, Meilisearch, dll) di latar belakang:
 ```bash
+./vendor/bin/sail build
 ./vendor/bin/sail up -d
 ```
 > [!NOTE] 
-> Proses pertama kali (first boot) mungkin memakan waktu beberapa menit karena Docker harus mengunduh image yang dibutuhkan.
+> Proses pertama kali (first boot/build) mungkin memakan waktu beberapa menit karena Docker harus mengunduh dan membangun image yang dibutuhkan.
 
 ### 5. Generate Application Key
 Generate key keamanan untuk aplikasi Laravel Anda:
@@ -74,7 +75,7 @@ Generate key keamanan untuk aplikasi Laravel Anda:
 ### 6. Jalankan Migrasi Database
 Jalankan migrasi untuk membuat tabel database beserta data awal (seeders):
 ```bash
-./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail artisan migrate:fresh --seed
 ```
 
 ### 7. Install & Jalankan Frontend Assets

@@ -140,6 +140,74 @@ function setupValidationListeners() {
             el.addEventListener('change', checkStep2Validity);
         }
     });
+
+    setupNikAutofill();
+}
+
+function setupNikAutofill() {
+    const noIdentitasInput = document.getElementById('umum_no_identitas');
+    const jenisIdentitasInput = document.getElementById('umum_jenisidentitas');
+
+    if (!noIdentitasInput || !jenisIdentitasInput) return;
+
+    function parseNikAndAutofill() {
+        if (jenisIdentitasInput.value !== 'KTP') return;
+        
+        const nik = noIdentitasInput.value.trim();
+        if (nik.length !== 16 || !/^\d+$/.test(nik)) return;
+
+        // 1. Extract gender and birthday date digit
+        const dateDigit = parseInt(nik.substring(6, 8), 10);
+        const monthDigit = nik.substring(8, 10);
+        const yearDigit = nik.substring(10, 12);
+
+        // Validation for digits
+        if (isNaN(dateDigit) || isNaN(parseInt(monthDigit, 10)) || isNaN(parseInt(yearDigit, 10))) return;
+
+        let gender = '';
+        let day = dateDigit;
+        if (dateDigit > 40) {
+            gender = 'Perempuan';
+            day = dateDigit - 40;
+        } else {
+            gender = 'Laki-laki';
+        }
+
+        // Pad day to 2 digits
+        const dayStr = String(day).padStart(2, '0');
+
+        // 2. Extract year of birth
+        const currentYear = new Date().getFullYear();
+        const currentYearLast2 = currentYear % 100;
+        const parsedYear = parseInt(yearDigit, 10);
+        
+        let fullYear = parsedYear + (parsedYear > currentYearLast2 ? 1900 : 2000);
+
+        // 3. Auto-fill Tanggal Lahir (dd-mm-yyyy)
+        const formattedDate = `${dayStr}-${monthDigit}-${fullYear}`;
+        const tglLahirInput = document.getElementById('umum_tgllahir');
+        if (tglLahirInput) {
+            if (tglLahirInput._flatpickr) {
+                tglLahirInput._flatpickr.setDate(formattedDate, true);
+            } else {
+                tglLahirInput.value = formattedDate;
+                tglLahirInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // 4. Auto-fill Jenis Kelamin radio button
+        const genderRadio = document.querySelector(`input[name="jenis_kelamin"][value="${gender}"]`);
+        if (genderRadio) {
+            genderRadio.checked = true;
+            genderRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        // Trigger validation check
+        checkStep1Validity();
+    }
+
+    noIdentitasInput.addEventListener('input', parseNikAndAutofill);
+    jenisIdentitasInput.addEventListener('change', parseNikAndAutofill);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

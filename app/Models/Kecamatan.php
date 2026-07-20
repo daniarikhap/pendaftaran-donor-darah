@@ -11,6 +11,8 @@ class Kecamatan extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+
     protected $table = 'kecamatan';
 
     protected $fillable = ['kabupaten_id', 'nama'];

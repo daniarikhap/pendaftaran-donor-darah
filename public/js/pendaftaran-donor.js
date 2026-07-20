@@ -201,6 +201,50 @@ function setupNikAutofill() {
             genderRadio.checked = true;
             genderRadio.dispatchEvent(new Event('change', { bubbles: true }));
         }
+
+        // 5. Auto-fill Wilayah (Provinsi, Kabupaten, Kecamatan, Kelurahan) dari NIK
+        const provSelect = document.getElementById('umum_provinsi');
+        const kabSelect = document.getElementById('umum_kabupaten');
+        const kecSelect = document.getElementById('umum_kecamatan');
+        const kelSelect = document.getElementById('umum_kelurahan');
+
+        if (provSelect && kabSelect && kecSelect && kelSelect) {
+            window.isAutofillingWilayah = true;
+            fetch(`/api/wilayah-by-nik/${nik}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        provSelect.value = res.provinsi_id;
+                        $(provSelect).trigger('change');
+
+                        kabSelect.innerHTML = '<option value="">-- Pilih Kabupaten --</option>';
+                        res.kabupaten_list.forEach(item => {
+                            kabSelect.innerHTML += `<option value="${item.id}" ${item.id == res.kabupaten_id ? 'selected' : ''}>${item.nama}</option>`;
+                        });
+                        $(kabSelect).trigger('change');
+
+                        kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                        res.kecamatan_list.forEach(item => {
+                            kecSelect.innerHTML += `<option value="${item.id}" ${item.id == res.kecamatan_id ? 'selected' : ''}>${item.nama}</option>`;
+                        });
+                        $(kecSelect).trigger('change');
+
+                        kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                        res.kelurahan_list.forEach(item => {
+                            kelSelect.innerHTML += `<option value="${item.id}">${item.nama}</option>`;
+                        });
+                        $(kelSelect).trigger('change');
+
+                        if (typeof checkStep2Validity === 'function') {
+                            checkStep2Validity();
+                        }
+                    }
+                })
+                .catch(err => console.error('Error autofilling wilayah from NIK:', err))
+                .finally(() => {
+                    window.isAutofillingWilayah = false;
+                });
+        }
         
         // Trigger validation check
         checkStep1Validity();
@@ -318,6 +362,7 @@ function setupCascadingDropdowns() {
     const kelSelect = document.getElementById('umum_kelurahan');
 
     provSelect.addEventListener('change', function() {
+        if (window.isAutofillingWilayah) return;
         const provId = this.value;
         kabSelect.innerHTML = '<option value="">-- Pilih Kabupaten --</option>';
         kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
@@ -340,6 +385,7 @@ function setupCascadingDropdowns() {
     });
 
     kabSelect.addEventListener('change', function() {
+        if (window.isAutofillingWilayah) return;
         const kabId = this.value;
         kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
         kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
@@ -360,6 +406,7 @@ function setupCascadingDropdowns() {
     });
 
     kecSelect.addEventListener('change', function() {
+        if (window.isAutofillingWilayah) return;
         const kecId = this.value;
         kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
         $(kelSelect).trigger('change');

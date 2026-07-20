@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Pegawai extends Model
@@ -44,5 +45,25 @@ class Pegawai extends Model
     public function loginUsers(): HasMany
     {
         return $this->hasMany(User::class, 'pegawai_id', 'pegawai_id');
+    }
+
+    public function provinsi(): BelongsTo
+    {
+        return $this->belongsTo(Provinsi::class, 'provinsi_id', 'id');
+    }
+
+    public function kabupaten(): BelongsTo
+    {
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'id');
+    }
+
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class, 'kecamatan_id', 'id');
+    }
+
+    public function kelurahan(): BelongsTo
+    {
+        return $this->belongsTo(Kelurahan::class, 'kelurahan_id', 'id');
     }
 }

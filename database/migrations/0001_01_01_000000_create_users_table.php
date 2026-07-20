@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('provinsi', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->primary();
             $table->string('nama');
             $table->timestamps();
         });
 
         Schema::create('kabupaten', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->primary();
             $table->unsignedBigInteger('provinsi_id');
             $table->string('nama');
             $table->timestamps();
@@ -27,7 +27,7 @@ return new class extends Migration
         });
 
         Schema::create('kecamatan', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->primary();
             $table->unsignedBigInteger('kabupaten_id');
             $table->string('nama');
             $table->timestamps();
@@ -36,7 +36,7 @@ return new class extends Migration
         });
 
         Schema::create('kelurahan', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->primary();
             $table->unsignedBigInteger('kecamatan_id');
             $table->string('nama');
             $table->timestamps();
@@ -51,10 +51,10 @@ return new class extends Migration
             $table->string('jenisidentitas')->nullable();
             $table->string('noidentitas');
             $table->string('nomorindukpegawai')->unique();
-            $table->integer('provinsi_id')->nullable();
-            $table->integer('kabupaten_id')->nullable();
-            $table->integer('kecamatan_id')->nullable();
-            $table->integer('kelurahan_id')->nullable();
+            $table->unsignedBigInteger('provinsi_id')->nullable();
+            $table->unsignedBigInteger('kabupaten_id')->nullable();
+            $table->unsignedBigInteger('kecamatan_id')->nullable();
+            $table->unsignedBigInteger('kelurahan_id')->nullable();
             $table->string('tempatlahir_pegawai')->nullable();
             $table->date('tgl_lahirpegawai')->nullable();
             $table->string('jeniskelamin')->nullable();
@@ -130,10 +130,10 @@ return new class extends Migration
             $table->integer('update_loginpemakai_id')->nullable();
             $table->integer('create_ruangan')->nullable();
             $table->unsignedInteger('pegawai_id')->nullable();
-            $table->integer('propinsi_id')->nullable();
-            $table->integer('kabupaten_id')->nullable();
-            $table->integer('kecamatan_id')->nullable();
-            $table->integer('kelurahan_id')->nullable();
+            $table->unsignedBigInteger('propinsi_id')->nullable();
+            $table->unsignedBigInteger('kabupaten_id')->nullable();
+            $table->unsignedBigInteger('kecamatan_id')->nullable();
+            $table->unsignedBigInteger('kelurahan_id')->nullable();
             $table->string('agama')->nullable();
             $table->timestamps();
 

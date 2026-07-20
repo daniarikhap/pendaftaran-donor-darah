@@ -391,6 +391,43 @@ class PendonorController extends Controller
     }
 
     /**
+     * Get wilayah (provinsi, kabupaten, kecamatan, kelurahan list) by NIK.
+     */
+    public function getWilayahByNik($nik)
+    {
+        if (strlen($nik) < 6) {
+            return response()->json(['success' => false, 'message' => 'NIK kurang dari 6 digit'], 400);
+        }
+
+        $provId = (int) substr($nik, 0, 2);
+        $kabId  = (int) substr($nik, 0, 4);
+        $kecId  = (int) substr($nik, 0, 6);
+
+        $provinsi = Provinsi::find($provId);
+        $kabupaten = Kabupaten::find($kabId);
+        $kecamatan = Kecamatan::find($kecId);
+
+        if (!$provinsi || !$kabupaten || !$kecamatan) {
+            return response()->json(['success' => false, 'message' => 'Kode wilayah tidak ditemukan'], 404);
+        }
+
+        $kabupatenList = Kabupaten::where('provinsi_id', $provId)->get(['id', 'nama']);
+        $kecamatanList = Kecamatan::where('kabupaten_id', $kabId)->get(['id', 'nama']);
+        $kelurahanList = Kelurahan::where('kecamatan_id', $kecId)->get(['id', 'nama']);
+
+        return response()->json([
+            'success' => true,
+            'provinsi_id' => $provId,
+            'kabupaten_id' => $kabId,
+            'kabupaten_nama' => $kabupaten->nama,
+            'kecamatan_id' => $kecId,
+            'kabupaten_list' => $kabupatenList,
+            'kecamatan_list' => $kecamatanList,
+            'kelurahan_list' => $kelurahanList,
+        ]);
+    }
+
+    /**
      * Get donor history.
      */
     public function getRiwayatDonor(Request $request)

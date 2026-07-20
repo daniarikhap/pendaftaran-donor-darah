@@ -73,4 +73,24 @@ class Pendonor extends Model
     {
         return $this->belongsTo(Pekerjaan::class, 'pekerjaan_id', 'pekerjaan_id');
     }
+
+    public function provinsi(): BelongsTo
+    {
+        return $this->belongsTo(Provinsi::class, 'propinsi_id', 'id');
+    }
+
+    public function kabupaten(): BelongsTo
+    {
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id', 'id');
+    }
+
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class, 'kecamatan_id', 'id');
+    }
+
+    public function kelurahan(): BelongsTo
+    {
+        return $this->belongsTo(Kelurahan::class, 'kelurahan_id', 'id');
+    }
 }

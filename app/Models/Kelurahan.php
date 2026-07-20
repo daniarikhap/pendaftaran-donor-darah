@@ -10,6 +10,8 @@ class Kelurahan extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+
     protected $table = 'kelurahan';
 
     protected $fillable = ['kecamatan_id', 'nama'];

@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(WilayahSeeder::class);
+
         // User::factory(10)->create();
 
         $pegawai = Pegawai::factory()->create([
@@ -441,6 +443,46 @@ class DatabaseSeeder extends Seeder
             ];
 
         foreach ($dataPegawai as $index => $data) {
+            $nik = $data['noidentitas'] ?? '';
+            $provinsiId = null;
+            $kabupatenId = null;
+            $kecamatanId = null;
+            $kelurahanId = null;
+
+            if (strlen($nik) >= 6) {
+                $provId = (int) substr($nik, 0, 2);
+                $kabId  = (int) substr($nik, 0, 4);
+                $kecId  = (int) substr($nik, 0, 6);
+
+                if (\App\Models\Provinsi::where('id', $provId)->exists()) {
+                    $provinsiId = $provId;
+                }
+                if (\App\Models\Kabupaten::where('id', $kabId)->exists()) {
+                    $kabupatenId = $kabId;
+                }
+                if (\App\Models\Kecamatan::where('id', $kecId)->exists()) {
+                    $kecamatanId = $kecId;
+                }
+
+                if ($kecamatanId) {
+                    $kelurahans = \App\Models\Kelurahan::where('kecamatan_id', $kecamatanId)->get();
+                    foreach ($kelurahans as $kel) {
+                        if (!empty($data['alamat_pegawai']) && stripos($data['alamat_pegawai'], $kel->nama) !== false) {
+                            $kelurahanId = $kel->id;
+                            break;
+                        }
+                    }
+                    if (!$kelurahanId) {
+                        $kelurahanId = $kelurahans->first()?->id;
+                    }
+                }
+            }
+
+            $data['provinsi_id'] = $provinsiId;
+            $data['kabupaten_id'] = $kabupatenId;
+            $data['kecamatan_id'] = $kecamatanId;
+            $data['kelurahan_id'] = $kelurahanId;
+
             $pegawaiItem = Pegawai::create(array_merge($data, [
                 'pegawai_aktif' => true,
                 'is_admin' => false,

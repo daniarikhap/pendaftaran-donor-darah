@@ -148,4 +148,16 @@ Setelah membuat alias, Anda dapat menggunakan perintah di bawah ini:
    echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
    ```
 
+---
 
+## 🗺️ Database Wilayah Indonesia (Kemendagri)
+
+Aplikasi ini menggunakan database lokal untuk menyimpan seluruh wilayah administratif Indonesia (Provinsi, Kabupaten/Kota, Kecamatan, Kelurahan/Desa) untuk kebutuhan pencocokan NIK KTP dan dropdown wilayah pendaftaran donor.
+
+* **Sumber Dataset**: Repositori GitHub [guzfirdaus/Wilayah-Administrasi-Indonesia](https://github.com/guzfirdaus/Wilayah-Administrasi-Indonesia) yang berbasis pada standar Keputusan Kemendagri resmi (kode wilayah 10 digit).
+* **Lokasi Data Mentah (CSV)**: [database/data/](file:///home/mahrus/Development/pendaftaran-donor-darah/database/data/)
+  * `provinces.csv` (Provinsi)
+  * `regencies.csv` (Kabupaten/Kota)
+  * `districts.csv` (Kecamatan)
+  * `villages.csv` (Kelurahan/Desa)
+* **Mekanisme Import**: Diimpor langsung ke database lokal menggunakan seeder [WilayahSeeder.php](file:///home/mahrus/Development/pendaftaran-donor-darah/database/seeders/WilayahSeeder.php) yang dijalankan saat `sail artisan migrate:fresh --seed`.

@@ -85,6 +85,10 @@ Bangun image container terlebih dahulu lalu nyalakan semua service (Web server, 
 ./vendor/bin/sail build
 ./vendor/bin/sail up -d
 ```
+Untuk menghentikan service, Anda dapat menggunakan perintah:
+```bash
+./vendor/bin/sail down
+```
 > [!NOTE] 
 > Proses pertama kali (first boot/build) mungkin memakan waktu beberapa menit karena Docker harus mengunduh dan membangun image yang dibutuhkan.
 

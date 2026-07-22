@@ -4,6 +4,28 @@ Dokumen ini berisi panduan langkah demi langkah untuk mengkloning dan menjalanka
 
 ---
 
+## 📝 Deskripsi Aplikasi
+Aplikasi **Pendaftaran Donor Darah** adalah sistem berbasis web yang dirancang untuk mempermudah proses pendaftaran, seleksi kelayakan, dan pengelolaan data pendonor darah. Aplikasi ini dilengkapi dengan integrasi database wilayah administratif Indonesia resmi dari Kemendagri untuk validasi alamat/NIK, serta sistem kuesioner dinamis untuk skrining awal kesehatan calon pendonor.
+
+## ✨ Fitur Utama
+1. **Pendaftaran Pendonor (Registrasi & Biodata)**:
+   - Validasi data pendonor berdasarkan NIK.
+   - Dropdown wilayah administratif Indonesia terintegrasi secara dinamis (Provinsi, Kabupaten, Kecamatan, Kelurahan).
+2. **Pendaftaran Donor Darah & Skrining**:
+   - Pengisian kuesioner kelayakan donor darah dinamis.
+   - Pendaftaran antrean berdasarkan pemilihan ruangan/lokasi donor.
+3. **Manajemen Admin (Back-Office)**:
+   - Dashboard statistik real-time (total pendaftaran, donor berhasil, total pendonor, dll).
+   - CRUD Manajemen Kuesioner Skrining.
+   - CRUD Manajemen Ruang/Lokasi Donor.
+   - CRUD Manajemen Jenis Pekerjaan Pendonor.
+4. **Proses Seleksi & Riwayat**:
+   - Pemeriksaan kelayakan medis pendonor oleh petugas (seleksi donor).
+   - Pencatatan status donor (Donor Berhasil, Batal, dll).
+   - Tracking riwayat donor pendonor.
+
+---
+
 ## 🛠️ Persyaratan Sistem (Prerequisites) 
 
 Sebelum memulai, pastikan komputer Windows tujuan sudah terinstal perangkat lunak berikut: 

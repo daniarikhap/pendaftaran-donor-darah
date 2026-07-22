@@ -57,8 +57,8 @@ Buka terminal WSL Anda, masuk ke direktori home, lalu clone project ini:
 cd ~
 mkdir -p Development
 cd Development
-git clone <URL_REPOSITORY_ANDA> pendaftaran-donor
-cd pendaftaran-donor
+git clone <URL_REPOSITORY_ANDA>
+cd pendaftaran-donor-darah
 ```
 
 ### 2. Duplikasi File `.env` 
